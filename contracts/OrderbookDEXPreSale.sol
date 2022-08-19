@@ -1,0 +1,178 @@
+// SPDX-License-Identifier: BUSL-1.1
+
+pragma solidity 0.8.15;
+
+import { IOrderbookDEXToken } from "./interfaces/IOrderbookDEXToken.sol";
+import { IOrderbookDEXPreSale, ExchangeRate } from "./interfaces/IOrderbookDEXPreSale.sol";
+
+// TODO vesting
+// TODO pre-sale stages
+
+/**
+ * The Orderbook DEX Token pre-sale.
+ */
+contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
+    /**
+     * The Orderbook DEX token.
+     */
+    IOrderbookDEXToken private immutable _token;
+
+    /**
+     * The Orderbook DEX treasury.
+     */
+    address payable private immutable _treasury;
+
+    /**
+     * The time the pre-sale starts.
+     */
+    uint256 private immutable _startTime;
+
+    /**
+     * The time the pre-sale ends.
+     */
+    uint256 private immutable _endTime;
+
+    /**
+     * The time bought tokens are released.
+     */
+    uint256 private immutable _releaseTime;
+
+    /**
+     * The exchange rate.
+     */
+    ExchangeRate private /*immutable*/ _exchangeRate;
+
+    /**
+     * The total amount sold.
+     */
+    uint256 private _totalSold;
+
+    /**
+     * The amount sold to an account.
+     */
+    mapping(address => uint256) _amountSold;
+
+    /**
+     * The amount claimed by an account.
+     */
+    mapping(address => uint256) _amountClaimed;
+
+    /**
+     * Constructor.
+     *
+     * @param token_        The Orderbook DEX token
+     * @param treasury_     The Orderbook DEX treasury
+     * @param startTime_    the time the pre-sale starts
+     * @param endTime_      the time the pre-sale ends
+     * @param releaseTime_  the time bought tokens are released
+     * @param exchangeRate_ the exchange rate
+     */
+    constructor(
+        IOrderbookDEXToken  token_,
+        address payable     treasury_,
+        uint256             startTime_,
+        uint256             endTime_,
+        uint256             releaseTime_,
+        ExchangeRate memory exchangeRate_
+    ) {
+        require(startTime_ < endTime_);
+        require(endTime_ < releaseTime_);
+        require(exchangeRate_.receivedAmount > 0);
+        require(exchangeRate_.givenAmount > 0);
+
+        _token        = token_;
+        _treasury     = treasury_;
+        _startTime    = startTime_;
+        _endTime      = endTime_;
+        _releaseTime  = releaseTime_;
+        _exchangeRate = exchangeRate_;
+    }
+
+    function buy() external payable returns (uint256 amountBought, uint256 amountPaid) {
+        uint256 currentTime = block.timestamp;
+        if (currentTime < _startTime) {
+            revert NotStarted();
+        }
+        if (currentTime > _endTime) {
+            revert Ended();
+        }
+
+        uint256 amountAvailable = _token.balanceOf(address(this)) - _totalSold;
+        if (amountAvailable == 0) {
+            revert SoldOut();
+        }
+
+        ExchangeRate memory exchangeRate_ = _exchangeRate;
+        amountBought = msg.value * exchangeRate_.receivedAmount / exchangeRate_.givenAmount;
+        if (amountBought == 0) {
+            revert NotEnoughFunds();
+        }
+        if (amountBought > amountAvailable) {
+            amountBought = amountAvailable;
+        }
+        amountPaid = amountBought * exchangeRate_.givenAmount / exchangeRate_.receivedAmount;
+
+        _amountSold[msg.sender] += amountBought;
+        _totalSold += amountBought;
+
+        _treasury.transfer(amountPaid);
+        if (msg.value > amountPaid) {
+            payable(msg.sender).transfer(msg.value - amountPaid);
+        }
+    }
+
+    function claim() external returns (uint256) {
+        uint256 currentTime = block.timestamp;
+        if (currentTime < _releaseTime) {
+            revert NotReleased();
+        }
+
+        uint256 amount = _amountSold[msg.sender] - _amountClaimed[msg.sender];
+
+        if (amount == 0) {
+            revert NothingToClaim();
+        }
+
+        _amountClaimed[msg.sender] += amount;
+
+        _token.transfer(msg.sender, amount);
+
+        return amount;
+    }
+
+    function token() external view returns (IOrderbookDEXToken) {
+        return _token;
+    }
+
+    function treasury() external view returns (address) {
+        return _treasury;
+    }
+
+    function startTime() external view returns (uint256) {
+        return _startTime;
+    }
+
+    function endTime() external view returns (uint256) {
+        return _endTime;
+    }
+
+    function releaseTime() external view returns (uint256) {
+        return _releaseTime;
+    }
+
+    function exchangeRate() external view returns (ExchangeRate memory) {
+        return _exchangeRate;
+    }
+
+    function totalSold() external view returns (uint256) {
+        return _totalSold;
+    }
+
+    function amountSold(address account) external view returns (uint256) {
+        return _amountSold[account];
+    }
+
+    function amountClaimed(address account) external view returns (uint256) {
+        return _amountClaimed[account];
+    }
+}
