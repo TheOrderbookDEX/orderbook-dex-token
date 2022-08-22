@@ -1,6 +1,7 @@
 import { AddContextFunction, BaseTestContext, now, TestScenario, TestScenarioProperties } from '@theorderbookdex/contract-test-helper';
 import { ExchangeRate, OrderbookDEXPreSale } from '../../src/OrderbookDEXPreSale';
-import { formatExchangeRate, formatTimeOffset } from '../utils/utils';
+import { formatExchangeRate, formatTimeOffset } from '../utils/format';
+import { ONE_HOUR } from '../utils/timestamp';
 
 export interface DeployPreSaleContext extends BaseTestContext {
     readonly startTime: bigint;
@@ -9,15 +10,21 @@ export interface DeployPreSaleContext extends BaseTestContext {
 }
 
 export interface DeployPreSaleScenarioProperties extends TestScenarioProperties<DeployPreSaleContext> {
-    readonly token: string;
-    readonly treasury: string;
-    readonly startTimeOffset: bigint;
-    readonly endTimeOffset: bigint;
-    readonly releaseTimeOffset: bigint;
+    readonly token?: string;
+    readonly treasury?: string;
+    readonly startTimeOffset?: bigint;
+    readonly endTimeOffset?: bigint;
+    readonly releaseTimeOffset?: bigint;
     readonly exchangeRate: Readonly<ExchangeRate>;
 }
 
 export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, OrderbookDEXPreSale, string> {
+    static readonly DEFAULT_TOKEN = '0x1000000000000000000000000000000000000001';
+    static readonly DEFAULT_TREASURY = '0x1000000000000000000000000000000000000002';
+    static readonly DEFAULT_START_TIME_OFFSET = 0n;
+    static readonly DEFAULT_END_TIME_OFFSET = ONE_HOUR;
+    static readonly DEFAULT_RELEASE_TIME_OFFSET = ONE_HOUR;
+
     readonly token: string;
     readonly treasury: string;
     readonly startTimeOffset: bigint;
@@ -26,11 +33,11 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     readonly exchangeRate: Readonly<ExchangeRate>;
 
     constructor({
-        token,
-        treasury,
-        startTimeOffset,
-        endTimeOffset,
-        releaseTimeOffset,
+        token             = DeployPreSaleScenario.DEFAULT_TOKEN,
+        treasury          = DeployPreSaleScenario.DEFAULT_TREASURY,
+        startTimeOffset   = DeployPreSaleScenario.DEFAULT_START_TIME_OFFSET,
+        endTimeOffset     = DeployPreSaleScenario.DEFAULT_END_TIME_OFFSET,
+        releaseTimeOffset = DeployPreSaleScenario.DEFAULT_RELEASE_TIME_OFFSET,
         exchangeRate,
         ...rest
     }: DeployPreSaleScenarioProperties) {
@@ -44,21 +51,30 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     }
 
     addContext(addContext: AddContextFunction): void {
-        addContext('token address', this.token);
-        addContext('treasury address', this.treasury);
-        addContext('start time', formatTimeOffset(this.startTimeOffset));
-        addContext('end time', formatTimeOffset(this.endTimeOffset));
-        addContext('release time', formatTimeOffset(this.releaseTimeOffset));
+        if (this.token != DeployPreSaleScenario.DEFAULT_TOKEN) {
+            addContext('token address', this.token);
+        }
+        if (this.treasury != DeployPreSaleScenario.DEFAULT_TREASURY) {
+            addContext('treasury address', this.treasury);
+        }
+        if (this.startTimeOffset != DeployPreSaleScenario.DEFAULT_START_TIME_OFFSET) {
+            addContext('start time', formatTimeOffset(this.startTimeOffset));
+        }
+        if (this.endTimeOffset != DeployPreSaleScenario.DEFAULT_END_TIME_OFFSET) {
+            addContext('end time', formatTimeOffset(this.endTimeOffset, 'start'));
+        }
+        if (this.releaseTimeOffset != DeployPreSaleScenario.DEFAULT_RELEASE_TIME_OFFSET) {
+            addContext('release time', formatTimeOffset(this.releaseTimeOffset, 'end'));
+        }
         addContext('exchange rate', formatExchangeRate(this.exchangeRate));
         super.addContext(addContext);
     }
 
     protected async _setup(): Promise<DeployPreSaleContext> {
         const ctx = await super._setup();
-        const currentTime = now();
-        const startTime = currentTime + this.startTimeOffset;
-        const endTime = currentTime + this.endTimeOffset;
-        const releaseTime = currentTime + this.releaseTimeOffset;
+        const startTime = now() + this.startTimeOffset;
+        const endTime = startTime + this.endTimeOffset;
+        const releaseTime = endTime + this.releaseTimeOffset;
         return { ...ctx, startTime, endTime, releaseTime };
     }
 

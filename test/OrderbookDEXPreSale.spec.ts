@@ -1,8 +1,10 @@
-import { DefaultOverrides } from '@theorderbookdex/abi2ts-lib';
+import { DefaultOverrides, getBalance } from '@theorderbookdex/abi2ts-lib';
 import { describeError } from '@theorderbookdex/contract-test-helper';
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import { buyPreSaleScenarios } from './scenarios/buyPreSaleScenarios';
 import { deployPreSaleScenarios } from './scenarios/deployPreSaleScenarios';
+import { transactionCost } from './utils/ethereum';
 
 chai.use(chaiAsPromised);
 
@@ -68,7 +70,68 @@ describe('OrderbookDEXPreSale', () => {
     });
 
     describe('buy', () => {
-        // TODO test OrderbookDEXPreSale buy
+        for (const scenario of buyPreSaleScenarios) {
+            scenario.describe(({ it }) => {
+                if (scenario.expectedError) {
+                    it('should fail', async (test) => {
+                        await expect(test.execute())
+                            .to.be.rejected;
+                    });
+
+                    it(`should fail with ${describeError(scenario.expectedError)}`, async (test) => {
+                        await expect(test.executeStatic())
+                            .to.be.rejectedWith(scenario.expectedError as typeof Error);
+                    });
+
+                } else {
+                    it('should return amount bought', async (test) => {
+                        const [ amountBought ] = await test.executeStatic();
+                        expect(amountBought)
+                            .to.be.equal(scenario.value * scenario.exchangeRate.receivedAmount / scenario.exchangeRate.givenAmount);
+                    });
+
+                    it('should return amount paid', async (test) => {
+                        const [ amountBought, amountPaid ] = await test.executeStatic();
+                        expect(amountPaid)
+                            .to.be.equal(amountBought * scenario.exchangeRate.givenAmount / scenario.exchangeRate.receivedAmount);
+                    });
+
+                    it('should transfer amount paid to treasury', async (test) => {
+                        const [ , amountPaid ] = await test.executeStatic();
+                        const treasury = await test.preSale.treasury();
+                        const expectedBalance = await getBalance(treasury) + amountPaid;
+                        await test.execute();
+                        expect(await getBalance(treasury))
+                            .to.be.equal(expectedBalance);
+                    });
+
+                    it('should return unused funds to buyer', async (test) => {
+                        const [ , amountPaid ] = await test.executeStatic();
+                        const prevBalance = await getBalance(test.mainAccount);
+                        const tx = await test.execute();
+                        const txCost = transactionCost(tx);
+                        expect(await getBalance(test.mainAccount))
+                            .to.be.equal(prevBalance - txCost - amountPaid);
+                    });
+
+                    it('should increase total amount sold', async (test) => {
+                        const [ amountBought ] = await test.executeStatic();
+                        const expectedTotalSold = await test.preSale.totalSold() + amountBought;
+                        await test.execute();
+                        expect(await test.preSale.totalSold())
+                            .to.be.equal(expectedTotalSold);
+                    });
+
+                    it('should increase amount sold for buyer', async (test) => {
+                        const [ amountBought ] = await test.executeStatic();
+                        const expectedAmountSold = await test.preSale.amountSold(test.mainAccount) + amountBought;
+                        await test.execute();
+                        expect(await test.preSale.amountSold(test.mainAccount))
+                            .to.be.equal(expectedAmountSold);
+                    });
+                }
+            });
+        }
     });
 
     describe('claim', () => {
