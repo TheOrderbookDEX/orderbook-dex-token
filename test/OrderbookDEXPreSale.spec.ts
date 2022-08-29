@@ -2,7 +2,9 @@ import { DefaultOverrides, getBalance } from '@theorderbookdex/abi2ts-lib';
 import { describeError } from '@theorderbookdex/contract-test-helper';
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import { IOrderbookDEXToken } from '../src/interfaces/IOrderbookDEXToken';
 import { buyPreSaleScenarios } from './scenarios/buyPreSaleScenarios';
+import { claimPreSaleScenarios } from './scenarios/claimPreSaleScenarios';
 import { deployPreSaleScenarios } from './scenarios/deployPreSaleScenarios';
 import { transactionCost } from './utils/ethereum';
 
@@ -135,6 +137,49 @@ describe('OrderbookDEXPreSale', () => {
     });
 
     describe('claim', () => {
-        // TODO test OrderbookDEXPreSale claim
+        for (const scenario of claimPreSaleScenarios) {
+            scenario.describe(({ it }) => {
+                if (scenario.expectedError) {
+                    it('should fail', async (test) => {
+                        await expect(test.execute())
+                            .to.be.rejected;
+                    });
+
+                    it(`should fail with ${describeError(scenario.expectedError)}`, async (test) => {
+                        await expect(test.executeStatic())
+                            .to.be.rejectedWith(scenario.expectedError as typeof Error);
+                    });
+
+                } else {
+                    it('should return amount claimed', async (test) => {
+                        const { preSale, mainAccount } = test;
+                        const amountBought = await preSale.amountSold(mainAccount);
+                        const amountClaimedBefore = await preSale.amountClaimed(mainAccount);
+                        const amountClaimed = await test.executeStatic();
+                        expect(amountClaimed)
+                            .to.be.equal(amountBought - amountClaimedBefore);
+                    });
+
+                    it('should transfer amount claimed to buyer', async (test) => {
+                        const { preSale, mainAccount } = test;
+                        const token = IOrderbookDEXToken.at(await preSale.token());
+                        const amountClaimed = await test.executeStatic();
+                        const expectedBalance = await token.balanceOf(mainAccount) + amountClaimed;
+                        await test.execute();
+                        expect(await token.balanceOf(mainAccount))
+                            .to.be.equal(expectedBalance);
+                    });
+
+                    it('should increase amount claimed for buyer', async (test) => {
+                        const { preSale, mainAccount } = test;
+                        const amountClaimed = await test.executeStatic();
+                        const expectedAmountClaimed = await preSale.amountClaimed(mainAccount) + amountClaimed;
+                        await test.execute();
+                        expect(await preSale.amountClaimed(test.mainAccount))
+                            .to.be.equal(expectedAmountClaimed);
+                    });
+                }
+            });
+        }
     });
 });

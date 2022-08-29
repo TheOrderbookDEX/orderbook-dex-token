@@ -1,6 +1,9 @@
 import { formatValue } from '@theorderbookdex/abi2ts-lib';
 import { ConfigurableDescriber } from '@theorderbookdex/contract-test-helper';
+import { BuyPreSaleAction } from '../action/BuyPreSaleAction';
+import { FastForwardToReleaseAction } from '../action/FastForwardToReleaseAction';
 import { BuyPreSaleScenario } from '../scenario/BuyPreSaleScenario';
+import { ClaimPreSaleScenario } from '../scenario/ClaimPreSaleScenario';
 import { DeployPreSaleScenario } from '../scenario/DeployPreSaleScenario';
 import { formatExchangeRate, formatTimeOffset } from '../utils/format';
 
@@ -44,4 +47,36 @@ describer.addDescriber(BuyPreSaleScenario, ({
     }
     settings.push(`exchangeRate = ${formatExchangeRate(exchangeRate)}`);
     return `buy using ${formatValue(value)} ETH with ${settings.join(' and ')}`;
+});
+
+describer.addDescriber(ClaimPreSaleScenario, ({
+    startTimeOffset, endTimeOffset, releaseTimeOffset, exchangeRate, setupActions
+}) => {
+    const description = ['claim'];
+    for (const [ index, action ] of setupActions.entries()) {
+        description.push(index == 0 ? 'after' : 'and');
+        description.push(action.description);
+    }
+    description.push('with');
+    if (startTimeOffset != BuyPreSaleScenario.DEFAULT_START_TIME_OFFSET) {
+        description.push(`startTime = ${formatTimeOffset(startTimeOffset)}`);
+    }
+    if (endTimeOffset != BuyPreSaleScenario.DEFAULT_END_TIME_OFFSET) {
+        description.push(`endTime = ${formatTimeOffset(endTimeOffset, 'start')}`);
+    }
+    if (releaseTimeOffset != BuyPreSaleScenario.DEFAULT_RELEASE_TIME_OFFSET) {
+        description.push(`releaseTime = ${formatTimeOffset(releaseTimeOffset, 'end')}`);
+    }
+    description.push(`exchangeRate = ${formatExchangeRate(exchangeRate)}`);
+    return description.join(' ');
+});
+
+describer.addDescriber(BuyPreSaleAction, ({
+    value
+}) => {
+    return `buy using ${formatValue(value)} ETH`;
+});
+
+describer.addDescriber(FastForwardToReleaseAction, () => {
+    return `fast forward to release`;
 });
