@@ -5,7 +5,6 @@ pragma solidity 0.8.15;
 import { IOrderbookDEXToken } from "./interfaces/IOrderbookDEXToken.sol";
 import { IOrderbookDEXPreSale, ExchangeRate } from "./interfaces/IOrderbookDEXPreSale.sol";
 
-// TODO vesting
 // TODO pre-sale stages
 
 /**
@@ -43,6 +42,21 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
     ExchangeRate private /*immutable*/ _exchangeRate;
 
     /**
+     * The amount of tokens available at release per 1e18 tokens bought.
+     */
+    uint256 private immutable _availableAtRelease;
+
+    /**
+     * The duration of each vesting period.
+     */
+    uint256 private immutable _vestingPeriod;
+
+    /**
+     * The amount of tokens vested after one period per 1e18 tokens bought.
+     */
+    uint256 private immutable _vestedAmountPerPeriod;
+
+    /**
      * The total amount sold.
      */
     uint256 private _totalSold;
@@ -73,19 +87,27 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
         uint256             startTime_,
         uint256             endTime_,
         uint256             releaseTime_,
-        ExchangeRate memory exchangeRate_
+        ExchangeRate memory exchangeRate_,
+        uint256             availableAtRelease_,
+        uint256             vestingPeriod_,
+        uint256             vestedAmountPerPeriod_
     ) {
         require(startTime_ < endTime_);
         require(endTime_ < releaseTime_);
         require(exchangeRate_.receivedAmount > 0);
         require(exchangeRate_.givenAmount > 0);
+        require(vestingPeriod_ > 0);
+        require(vestedAmountPerPeriod_ > 0);
 
-        _token        = token_;
-        _treasury     = treasury_;
-        _startTime    = startTime_;
-        _endTime      = endTime_;
-        _releaseTime  = releaseTime_;
-        _exchangeRate = exchangeRate_;
+        _token                 = token_;
+        _treasury              = treasury_;
+        _startTime             = startTime_;
+        _endTime               = endTime_;
+        _releaseTime           = releaseTime_;
+        _exchangeRate          = exchangeRate_;
+        _availableAtRelease    = availableAtRelease_;
+        _vestingPeriod         = vestingPeriod_;
+        _vestedAmountPerPeriod = vestedAmountPerPeriod_;
     }
 
     function buy() external payable returns (uint256 amountBought, uint256 amountPaid) {
@@ -127,17 +149,23 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
             revert NotReleased();
         }
 
-        uint256 amount = _amountSold[msg.sender] - _amountClaimed[msg.sender];
+        uint256 amountSold_ = _amountSold[msg.sender];
+        uint256 available = amountSold_ * _availableAtRelease / 1e18;
+        available += (currentTime - _releaseTime) / _vestingPeriod * (amountSold_ * _vestedAmountPerPeriod / 1e18);
+        if (available > amountSold_) {
+            available = amountSold_;
+        }
+        available -= _amountClaimed[msg.sender];
 
-        if (amount == 0) {
+        if (available == 0) {
             revert NothingToClaim();
         }
 
-        _amountClaimed[msg.sender] += amount;
+        _amountClaimed[msg.sender] += available;
 
-        _token.transfer(msg.sender, amount);
+        _token.transfer(msg.sender, available);
 
-        return amount;
+        return available;
     }
 
     function token() external view returns (IOrderbookDEXToken) {
@@ -162,6 +190,18 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
 
     function exchangeRate() external view returns (ExchangeRate memory) {
         return _exchangeRate;
+    }
+
+    function availableAtRelease() external view returns (uint256) {
+        return _availableAtRelease;
+    }
+
+    function vestingPeriod() external view returns (uint256) {
+        return _vestingPeriod;
+    }
+
+    function vestedAmountPerPeriod() external view returns (uint256) {
+        return _vestedAmountPerPeriod;
     }
 
     function totalSold() external view returns (uint256) {

@@ -66,6 +66,8 @@ describe('OrderbookDEXPreSale', () => {
                         expect(exchangeRate.receivedAmount)
                             .to.be.equal(scenario.exchangeRate.receivedAmount);
                     });
+
+                    // TODO test deployed vesting properties
                 }
             });
         }
@@ -152,6 +154,7 @@ describe('OrderbookDEXPreSale', () => {
 
                 } else {
                     it('should return amount claimed', async (test) => {
+                        // TODO consider vesting in expected amount claimed
                         const { preSale, mainAccount } = test;
                         const amountBought = await preSale.amountSold(mainAccount);
                         const amountClaimedBefore = await preSale.amountClaimed(mainAccount);

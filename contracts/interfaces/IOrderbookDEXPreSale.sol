@@ -134,4 +134,25 @@ interface IOrderbookDEXPreSale {
      * @return amountClaimed the amount claimed by the account
      */
     function amountClaimed(address account) external view returns (uint256 amountClaimed);
+
+    /**
+     * The amount of tokens available at release per 1e18 tokens bought.
+     *
+     * @return availableAtRelease the amount of tokens available at release per 1e18 tokens bought
+     */
+    function availableAtRelease() external view returns (uint256 availableAtRelease);
+
+    /**
+     * The duration of each vesting period.
+     *
+     * @return vestingPeriod the duration of each vesting period
+     */
+    function vestingPeriod() external view returns (uint256 vestingPeriod);
+
+    /**
+     * The amount of tokens vested after one period per 1e18 tokens bought.
+     *
+     * @return vestedAmountPerPeriod the amount of tokens vested after one period per 1e18 tokens bought
+     */
+    function vestedAmountPerPeriod() external view returns (uint256 vestedAmountPerPeriod);
 }

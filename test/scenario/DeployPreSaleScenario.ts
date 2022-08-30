@@ -1,3 +1,4 @@
+import { parseValue } from '@theorderbookdex/abi2ts-lib';
 import { AddContextFunction, BaseTestContext, now, TestScenario, TestScenarioProperties } from '@theorderbookdex/contract-test-helper';
 import { ExchangeRate, OrderbookDEXPreSale } from '../../src/OrderbookDEXPreSale';
 import { formatExchangeRate, formatTimeOffset } from '../utils/format';
@@ -24,6 +25,9 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     static readonly DEFAULT_START_TIME_OFFSET = 0n;
     static readonly DEFAULT_END_TIME_OFFSET = ONE_HOUR;
     static readonly DEFAULT_RELEASE_TIME_OFFSET = ONE_HOUR;
+    static readonly DEFAULT_AVAILABLE_AT_RELEASE = parseValue(1);
+    static readonly DEFAULT_VESTING_PERIOD = ONE_HOUR;
+    static readonly DEFAULT_VESTED_AMOUNT_PER_PERIOD = parseValue(1);
 
     readonly token: string;
     readonly treasury: string;
@@ -31,6 +35,9 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     readonly endTimeOffset: bigint;
     readonly releaseTimeOffset: bigint;
     readonly exchangeRate: Readonly<ExchangeRate>;
+    readonly availableAtRelease: bigint;
+    readonly vestingPeriod: bigint;
+    readonly vestedAmountPerPeriod: bigint;
 
     constructor({
         token             = DeployPreSaleScenario.DEFAULT_TOKEN,
@@ -42,12 +49,16 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
         ...rest
     }: DeployPreSaleScenarioProperties) {
         super(rest);
-        this.token = token;
-        this.treasury = treasury;
-        this.startTimeOffset = startTimeOffset;
-        this.endTimeOffset = endTimeOffset;
-        this.releaseTimeOffset = releaseTimeOffset;
-        this.exchangeRate = exchangeRate;
+        this.token                 = token;
+        this.treasury              = treasury;
+        this.startTimeOffset       = startTimeOffset;
+        this.endTimeOffset         = endTimeOffset;
+        this.releaseTimeOffset     = releaseTimeOffset;
+        this.exchangeRate          = exchangeRate;
+        // TODO allow changing these deploy properties
+        this.availableAtRelease    = DeployPreSaleScenario.DEFAULT_AVAILABLE_AT_RELEASE;
+        this.vestingPeriod         = DeployPreSaleScenario.DEFAULT_VESTING_PERIOD;
+        this.vestedAmountPerPeriod = DeployPreSaleScenario.DEFAULT_VESTED_AMOUNT_PER_PERIOD;
     }
 
     addContext(addContext: AddContextFunction): void {
@@ -83,12 +94,12 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     }
 
     async execute({ startTime, endTime, releaseTime }: DeployPreSaleContext) {
-        const { token, treasury, exchangeRate } = this;
-        return await OrderbookDEXPreSale.deploy(token, treasury, startTime, endTime, releaseTime, exchangeRate);
+        const { token, treasury, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod } = this;
+        return await OrderbookDEXPreSale.deploy(token, treasury, startTime, endTime, releaseTime, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod);
     }
 
     async executeStatic({ startTime, endTime, releaseTime }: DeployPreSaleContext) {
-        const { token, treasury, exchangeRate } = this;
-        return await OrderbookDEXPreSale.callStatic.deploy(token, treasury, startTime, endTime, releaseTime, exchangeRate);
+        const { token, treasury, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod } = this;
+        return await OrderbookDEXPreSale.callStatic.deploy(token, treasury, startTime, endTime, releaseTime, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod);
     }
 }
