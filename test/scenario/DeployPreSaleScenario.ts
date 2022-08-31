@@ -17,6 +17,9 @@ export interface DeployPreSaleScenarioProperties extends TestScenarioProperties<
     readonly endTimeOffset?: bigint;
     readonly releaseTimeOffset?: bigint;
     readonly exchangeRate: Readonly<ExchangeRate>;
+    readonly availableAtRelease?: bigint;
+    readonly vestingPeriod?: bigint;
+    readonly vestedAmountPerPeriod?: bigint;
 }
 
 export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, OrderbookDEXPreSale, string> {
@@ -40,12 +43,15 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     readonly vestedAmountPerPeriod: bigint;
 
     constructor({
-        token             = DeployPreSaleScenario.DEFAULT_TOKEN,
-        treasury          = DeployPreSaleScenario.DEFAULT_TREASURY,
-        startTimeOffset   = DeployPreSaleScenario.DEFAULT_START_TIME_OFFSET,
-        endTimeOffset     = DeployPreSaleScenario.DEFAULT_END_TIME_OFFSET,
-        releaseTimeOffset = DeployPreSaleScenario.DEFAULT_RELEASE_TIME_OFFSET,
+        token                 = DeployPreSaleScenario.DEFAULT_TOKEN,
+        treasury              = DeployPreSaleScenario.DEFAULT_TREASURY,
+        startTimeOffset       = DeployPreSaleScenario.DEFAULT_START_TIME_OFFSET,
+        endTimeOffset         = DeployPreSaleScenario.DEFAULT_END_TIME_OFFSET,
+        releaseTimeOffset     = DeployPreSaleScenario.DEFAULT_RELEASE_TIME_OFFSET,
         exchangeRate,
+        availableAtRelease    = DeployPreSaleScenario.DEFAULT_AVAILABLE_AT_RELEASE,
+        vestingPeriod         = DeployPreSaleScenario.DEFAULT_VESTING_PERIOD,
+        vestedAmountPerPeriod = DeployPreSaleScenario.DEFAULT_VESTED_AMOUNT_PER_PERIOD,
         ...rest
     }: DeployPreSaleScenarioProperties) {
         super(rest);
@@ -55,10 +61,9 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
         this.endTimeOffset         = endTimeOffset;
         this.releaseTimeOffset     = releaseTimeOffset;
         this.exchangeRate          = exchangeRate;
-        // TODO allow changing these deploy properties
-        this.availableAtRelease    = DeployPreSaleScenario.DEFAULT_AVAILABLE_AT_RELEASE;
-        this.vestingPeriod         = DeployPreSaleScenario.DEFAULT_VESTING_PERIOD;
-        this.vestedAmountPerPeriod = DeployPreSaleScenario.DEFAULT_VESTED_AMOUNT_PER_PERIOD;
+        this.availableAtRelease    = availableAtRelease;
+        this.vestingPeriod         = vestingPeriod;
+        this.vestedAmountPerPeriod = vestedAmountPerPeriod;
     }
 
     addContext(addContext: AddContextFunction): void {

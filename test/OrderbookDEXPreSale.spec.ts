@@ -67,7 +67,23 @@ describe('OrderbookDEXPreSale', () => {
                             .to.be.equal(scenario.exchangeRate.receivedAmount);
                     });
 
-                    // TODO test deployed vesting properties
+                    it('should deploy with the provided amount available at release', async (test) => {
+                        const preSale = await test.execute();
+                        expect(await preSale.availableAtRelease())
+                            .to.be.equal(scenario.availableAtRelease);
+                    });
+
+                    it('should deploy with the provided vesting period', async (test) => {
+                        const preSale = await test.execute();
+                        expect(await preSale.vestingPeriod())
+                            .to.be.equal(scenario.vestingPeriod);
+                    });
+
+                    it('should deploy with the provided vested amount per period', async (test) => {
+                        const preSale = await test.execute();
+                        expect(await preSale.vestedAmountPerPeriod())
+                            .to.be.equal(scenario.vestedAmountPerPeriod);
+                    });
                 }
             });
         }
