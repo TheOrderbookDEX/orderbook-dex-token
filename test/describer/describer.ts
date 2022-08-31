@@ -1,73 +1,99 @@
 import { formatValue } from '@theorderbookdex/abi2ts-lib';
 import { ConfigurableDescriber } from '@theorderbookdex/contract-test-helper';
+import { ExchangeRate } from '../../src/OrderbookDEXPreSale';
 import { BuyPreSaleAction } from '../action/BuyPreSaleAction';
 import { FastForwardToReleaseAction } from '../action/FastForwardToReleaseAction';
+import { FastForwardToVestingAction } from '../action/FastForwardToVestingAction';
 import { BuyPreSaleScenario } from '../scenario/BuyPreSaleScenario';
 import { ClaimPreSaleScenario } from '../scenario/ClaimPreSaleScenario';
 import { DeployPreSaleScenario } from '../scenario/DeployPreSaleScenario';
-import { formatExchangeRate, formatTimeOffset } from '../utils/format';
+import { formatExchangeRate, formatTimeOffset, formatTimePeriod } from '../utils/format';
 
 export const describer = new ConfigurableDescriber<void>();
 
-describer.addDescriber(DeployPreSaleScenario, ({
-    token, treasury, startTimeOffset, endTimeOffset, releaseTimeOffset, exchangeRate
-}) => {
-    const settings = [];
-    if (token != DeployPreSaleScenario.DEFAULT_TOKEN) {
-        settings.push(`token = ${token}`);
+function describePreSaleSettings({
+    token, treasury, startTimeOffset, endTimeOffset, releaseTimeOffset, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod
+}: {
+    token?: string,
+    treasury?: string,
+    startTimeOffset: bigint,
+    endTimeOffset: bigint,
+    releaseTimeOffset: bigint,
+    exchangeRate: Readonly<ExchangeRate>,
+    availableAtRelease: bigint,
+    vestingPeriod: bigint,
+    vestedAmountPerPeriod: bigint
+}): string[] {
+    const description: string[] = [];
+    if (token && token != DeployPreSaleScenario.DEFAULT_TOKEN) {
+        description.push(description.length ? 'and' : 'with');
+        description.push(`token = ${token}`);
     }
-    if (treasury != DeployPreSaleScenario.DEFAULT_TREASURY) {
-        settings.push(`treasury = ${treasury}`);
+    if (treasury && treasury != DeployPreSaleScenario.DEFAULT_TREASURY) {
+        description.push(description.length ? 'and' : 'with');
+        description.push(`treasury = ${treasury}`);
     }
     if (startTimeOffset != DeployPreSaleScenario.DEFAULT_START_TIME_OFFSET) {
-        settings.push(`startTime = ${formatTimeOffset(startTimeOffset)}`);
+        description.push(description.length ? 'and' : 'with');
+        description.push(`startTime = ${formatTimeOffset(startTimeOffset)}`);
     }
     if (endTimeOffset != DeployPreSaleScenario.DEFAULT_END_TIME_OFFSET) {
-        settings.push(`endTime = ${formatTimeOffset(endTimeOffset, 'start')}`);
+        description.push(description.length ? 'and' : 'with');
+        description.push(`endTime = ${formatTimeOffset(endTimeOffset, 'start')}`);
     }
     if (releaseTimeOffset != DeployPreSaleScenario.DEFAULT_RELEASE_TIME_OFFSET) {
-        settings.push(`releaseTime = ${formatTimeOffset(releaseTimeOffset, 'end')}`);
+        description.push(description.length ? 'and' : 'with');
+        description.push(`releaseTime = ${formatTimeOffset(releaseTimeOffset, 'end')}`);
     }
-    settings.push(`exchangeRate = ${formatExchangeRate(exchangeRate)}`);
-    return `deploy with ${settings.join(' and ')}`;
+    if (exchangeRate != DeployPreSaleScenario.DEFAULT_EXCHANGE_RATE) {
+        description.push(description.length ? 'and' : 'with');
+        description.push(`exchangeRate = ${formatExchangeRate(exchangeRate)}`);
+    }
+    if (availableAtRelease != DeployPreSaleScenario.DEFAULT_AVAILABLE_AT_RELEASE) {
+        description.push(description.length ? 'and' : 'with');
+        description.push(`availableAtRelease = ${formatValue(availableAtRelease)}`);
+    }
+    if (vestingPeriod != DeployPreSaleScenario.DEFAULT_VESTING_PERIOD) {
+        description.push(description.length ? 'and' : 'with');
+        description.push(`vestingPeriod = ${formatTimePeriod(vestingPeriod)}`);
+    }
+    if (vestedAmountPerPeriod != DeployPreSaleScenario.DEFAULT_VESTED_AMOUNT_PER_PERIOD) {
+        description.push(description.length ? 'and' : 'with');
+        description.push(`vestedAmountPerPeriod = ${formatValue(vestedAmountPerPeriod)}`);
+    }
+    return description;
+}
+
+describer.addDescriber(DeployPreSaleScenario, settings => {
+    const description = ['deploy'];
+    description.push(...describePreSaleSettings(settings));
+    return description.join(' ');
 });
 
 describer.addDescriber(BuyPreSaleScenario, ({
-    value, startTimeOffset, endTimeOffset, releaseTimeOffset, exchangeRate
+    value, setupActions, ...settings
 }) => {
-    const settings = [];
-    if (startTimeOffset != BuyPreSaleScenario.DEFAULT_START_TIME_OFFSET) {
-        settings.push(`startTime = ${formatTimeOffset(startTimeOffset)}`);
+    const description = ['buy'];
+    description.push('using');
+    description.push(formatValue(value));
+    description.push('ETH');
+    for (const [ index, action ] of setupActions.entries()) {
+        description.push(index == 0 ? 'after' : 'and');
+        description.push(action.description);
     }
-    if (endTimeOffset != BuyPreSaleScenario.DEFAULT_END_TIME_OFFSET) {
-        settings.push(`endTime = ${formatTimeOffset(endTimeOffset, 'start')}`);
-    }
-    if (releaseTimeOffset != BuyPreSaleScenario.DEFAULT_RELEASE_TIME_OFFSET) {
-        settings.push(`releaseTime = ${formatTimeOffset(releaseTimeOffset, 'end')}`);
-    }
-    settings.push(`exchangeRate = ${formatExchangeRate(exchangeRate)}`);
-    return `buy using ${formatValue(value)} ETH with ${settings.join(' and ')}`;
+    description.push(...describePreSaleSettings(settings));
+    return description.join(' ');
 });
 
 describer.addDescriber(ClaimPreSaleScenario, ({
-    startTimeOffset, endTimeOffset, releaseTimeOffset, exchangeRate, setupActions
+    setupActions, ...settings
 }) => {
     const description = ['claim'];
     for (const [ index, action ] of setupActions.entries()) {
         description.push(index == 0 ? 'after' : 'and');
         description.push(action.description);
     }
-    description.push('with');
-    if (startTimeOffset != BuyPreSaleScenario.DEFAULT_START_TIME_OFFSET) {
-        description.push(`startTime = ${formatTimeOffset(startTimeOffset)}`);
-    }
-    if (endTimeOffset != BuyPreSaleScenario.DEFAULT_END_TIME_OFFSET) {
-        description.push(`endTime = ${formatTimeOffset(endTimeOffset, 'start')}`);
-    }
-    if (releaseTimeOffset != BuyPreSaleScenario.DEFAULT_RELEASE_TIME_OFFSET) {
-        description.push(`releaseTime = ${formatTimeOffset(releaseTimeOffset, 'end')}`);
-    }
-    description.push(`exchangeRate = ${formatExchangeRate(exchangeRate)}`);
+    description.push(...describePreSaleSettings(settings));
     return description.join(' ');
 });
 
@@ -79,4 +105,8 @@ describer.addDescriber(BuyPreSaleAction, ({
 
 describer.addDescriber(FastForwardToReleaseAction, () => {
     return `fast forward to release`;
+});
+
+describer.addDescriber(FastForwardToVestingAction, ({ period }) => {
+    return `fast forward to vesting period #${period}`;
 });

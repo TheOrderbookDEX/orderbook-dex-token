@@ -1,4 +1,4 @@
-import { DefaultOverrides, getBalance } from '@theorderbookdex/abi2ts-lib';
+import { DefaultOverrides, getBalance, getBlockTimestamp } from '@theorderbookdex/abi2ts-lib';
 import { describeError } from '@theorderbookdex/contract-test-helper';
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -7,6 +7,7 @@ import { buyPreSaleScenarios } from './scenarios/buyPreSaleScenarios';
 import { claimPreSaleScenarios } from './scenarios/claimPreSaleScenarios';
 import { deployPreSaleScenarios } from './scenarios/deployPreSaleScenarios';
 import { transactionCost } from './utils/ethereum';
+import { E18, min } from './utils/math';
 
 chai.use(chaiAsPromised);
 
@@ -170,13 +171,19 @@ describe('OrderbookDEXPreSale', () => {
 
                 } else {
                     it('should return amount claimed', async (test) => {
-                        // TODO consider vesting in expected amount claimed
                         const { preSale, mainAccount } = test;
                         const amountBought = await preSale.amountSold(mainAccount);
+                        const timestamp = BigInt(await getBlockTimestamp());
+                        const releaseTime = await preSale.releaseTime();
+                        const availableAtRelease = await preSale.availableAtRelease();
+                        const vestingPeriod = await preSale.vestingPeriod();
+                        const vestedAmountPerPeriod = await preSale.vestedAmountPerPeriod();
+                        const availableRatio = availableAtRelease + (timestamp - releaseTime) / vestingPeriod * vestedAmountPerPeriod;
+                        const amountAvailable = min(amountBought * availableRatio / E18, amountBought);
                         const amountClaimedBefore = await preSale.amountClaimed(mainAccount);
                         const amountClaimed = await test.executeStatic();
                         expect(amountClaimed)
-                            .to.be.equal(amountBought - amountClaimedBefore);
+                            .to.be.equal(amountAvailable - amountClaimedBefore);
                     });
 
                     it('should transfer amount claimed to buyer', async (test) => {

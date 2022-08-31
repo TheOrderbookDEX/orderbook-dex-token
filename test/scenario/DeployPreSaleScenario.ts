@@ -1,7 +1,7 @@
-import { parseValue } from '@theorderbookdex/abi2ts-lib';
+import { formatValue, parseValue } from '@theorderbookdex/abi2ts-lib';
 import { AddContextFunction, BaseTestContext, now, TestScenario, TestScenarioProperties } from '@theorderbookdex/contract-test-helper';
 import { ExchangeRate, OrderbookDEXPreSale } from '../../src/OrderbookDEXPreSale';
-import { formatExchangeRate, formatTimeOffset } from '../utils/format';
+import { formatExchangeRate, formatTimeOffset, formatTimePeriod } from '../utils/format';
 import { ONE_HOUR } from '../utils/timestamp';
 
 export interface DeployPreSaleContext extends BaseTestContext {
@@ -16,7 +16,7 @@ export interface DeployPreSaleScenarioProperties extends TestScenarioProperties<
     readonly startTimeOffset?: bigint;
     readonly endTimeOffset?: bigint;
     readonly releaseTimeOffset?: bigint;
-    readonly exchangeRate: Readonly<ExchangeRate>;
+    readonly exchangeRate?: Readonly<ExchangeRate>;
     readonly availableAtRelease?: bigint;
     readonly vestingPeriod?: bigint;
     readonly vestedAmountPerPeriod?: bigint;
@@ -28,7 +28,8 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     static readonly DEFAULT_START_TIME_OFFSET = 0n;
     static readonly DEFAULT_END_TIME_OFFSET = ONE_HOUR;
     static readonly DEFAULT_RELEASE_TIME_OFFSET = ONE_HOUR;
-    static readonly DEFAULT_AVAILABLE_AT_RELEASE = parseValue(1);
+    static readonly DEFAULT_EXCHANGE_RATE: Readonly<ExchangeRate> = new ExchangeRate(1n, 1n);
+    static readonly DEFAULT_AVAILABLE_AT_RELEASE = 0n;
     static readonly DEFAULT_VESTING_PERIOD = ONE_HOUR;
     static readonly DEFAULT_VESTED_AMOUNT_PER_PERIOD = parseValue(1);
 
@@ -48,7 +49,7 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
         startTimeOffset       = DeployPreSaleScenario.DEFAULT_START_TIME_OFFSET,
         endTimeOffset         = DeployPreSaleScenario.DEFAULT_END_TIME_OFFSET,
         releaseTimeOffset     = DeployPreSaleScenario.DEFAULT_RELEASE_TIME_OFFSET,
-        exchangeRate,
+        exchangeRate          = DeployPreSaleScenario.DEFAULT_EXCHANGE_RATE,
         availableAtRelease    = DeployPreSaleScenario.DEFAULT_AVAILABLE_AT_RELEASE,
         vestingPeriod         = DeployPreSaleScenario.DEFAULT_VESTING_PERIOD,
         vestedAmountPerPeriod = DeployPreSaleScenario.DEFAULT_VESTED_AMOUNT_PER_PERIOD,
@@ -67,22 +68,15 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     }
 
     addContext(addContext: AddContextFunction): void {
-        if (this.token != DeployPreSaleScenario.DEFAULT_TOKEN) {
-            addContext('token address', this.token);
-        }
-        if (this.treasury != DeployPreSaleScenario.DEFAULT_TREASURY) {
-            addContext('treasury address', this.treasury);
-        }
-        if (this.startTimeOffset != DeployPreSaleScenario.DEFAULT_START_TIME_OFFSET) {
-            addContext('start time', formatTimeOffset(this.startTimeOffset));
-        }
-        if (this.endTimeOffset != DeployPreSaleScenario.DEFAULT_END_TIME_OFFSET) {
-            addContext('end time', formatTimeOffset(this.endTimeOffset, 'start'));
-        }
-        if (this.releaseTimeOffset != DeployPreSaleScenario.DEFAULT_RELEASE_TIME_OFFSET) {
-            addContext('release time', formatTimeOffset(this.releaseTimeOffset, 'end'));
-        }
+        addContext('token address', this.token);
+        addContext('treasury address', this.treasury);
+        addContext('start time', formatTimeOffset(this.startTimeOffset));
+        addContext('end time', formatTimeOffset(this.endTimeOffset, 'start'));
+        addContext('release time', formatTimeOffset(this.releaseTimeOffset, 'end'));
         addContext('exchange rate', formatExchangeRate(this.exchangeRate));
+        addContext('available at release', formatValue(this.availableAtRelease));
+        addContext('vesting period', formatTimePeriod(this.vestingPeriod));
+        addContext('vested amount per period', formatValue(this.vestedAmountPerPeriod));
         super.addContext(addContext);
     }
 
