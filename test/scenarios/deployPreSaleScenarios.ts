@@ -1,5 +1,5 @@
 import { parseValue } from '@theorderbookdex/abi2ts-lib';
-import { generatorChain, TestError } from '@theorderbookdex/contract-test-helper';
+import { generatorChain } from '@theorderbookdex/contract-test-helper';
 import { ExchangeRate } from '../../src/OrderbookDEXPreSale';
 import { describer } from '../describer/describer';
 import { DeployPreSaleScenario, DeployPreSaleScenarioProperties } from '../scenario/DeployPreSaleScenario';
@@ -50,32 +50,32 @@ export const deployPreSaleScenarios: Iterable<DeployPreSaleScenario> = generator
     yield {
         describer,
         endTimeOffset: 0n,
-        expectedError: Error as TestError, // TODO fix type in contract-test-helper
+        expectedError: Error,
     };
     yield {
         describer,
         releaseTimeOffset: 0n,
-        expectedError: Error as TestError, // TODO fix type in contract-test-helper
+        expectedError: Error,
     };
     yield {
         describer,
         exchangeRate: new ExchangeRate(0n, 1n),
-        expectedError: Error as TestError, // TODO fix type in contract-test-helper
+        expectedError: Error,
     };
     yield {
         describer,
         exchangeRate: new ExchangeRate(1n, 0n),
-        expectedError: Error as TestError, // TODO fix type in contract-test-helper
+        expectedError: Error,
     };
     yield {
         describer,
         vestingPeriod: 0n,
-        expectedError: Error as TestError, // TODO fix type in contract-test-helper
+        expectedError: Error,
     };
     yield {
         describer,
         vestedAmountPerPeriod: 0n,
-        expectedError: Error as TestError, // TODO fix type in contract-test-helper
+        expectedError: Error,
     };
 
 }).then(function*(properties) {
