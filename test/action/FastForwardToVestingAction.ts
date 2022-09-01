@@ -1,5 +1,5 @@
+import { setChainTime } from '@theorderbookdex/contract-test-helper';
 import { PreSaleContext } from '../scenario/PreSaleScenario';
-import { setChainTime } from '../utils/ethereum';
 import { PreSaleAction, PreSaleActionProperties } from './PreSaleAction';
 
 export interface FastForwardToVestingActionProperties extends PreSaleActionProperties {
