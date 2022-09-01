@@ -39,11 +39,11 @@ function describePreSaleSettings({
     }
     if (endTimeOffset != DeployPreSaleScenario.DEFAULT_END_TIME_OFFSET) {
         description.push(description.length ? 'and' : 'with');
-        description.push(`endTime = ${formatTimeOffset(endTimeOffset, 'start')}`);
+        description.push(`endTime = ${formatTimeOffset(endTimeOffset, 'startTime')}`);
     }
     if (releaseTimeOffset != DeployPreSaleScenario.DEFAULT_RELEASE_TIME_OFFSET) {
         description.push(description.length ? 'and' : 'with');
-        description.push(`releaseTime = ${formatTimeOffset(releaseTimeOffset, 'end')}`);
+        description.push(`releaseTime = ${formatTimeOffset(releaseTimeOffset, 'endTime')}`);
     }
     if (exchangeRate != DeployPreSaleScenario.DEFAULT_EXCHANGE_RATE) {
         description.push(description.length ? 'and' : 'with');

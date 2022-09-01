@@ -71,8 +71,8 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
         addContext('token address', this.token);
         addContext('treasury address', this.treasury);
         addContext('start time', formatTimeOffset(this.startTimeOffset));
-        addContext('end time', formatTimeOffset(this.endTimeOffset, 'start'));
-        addContext('release time', formatTimeOffset(this.releaseTimeOffset, 'end'));
+        addContext('end time', formatTimeOffset(this.endTimeOffset, 'startTime'));
+        addContext('release time', formatTimeOffset(this.releaseTimeOffset, 'endTime'));
         addContext('exchange rate', formatExchangeRate(this.exchangeRate));
         addContext('available at release', formatValue(this.availableAtRelease));
         addContext('vesting period', formatTimePeriod(this.vestingPeriod));

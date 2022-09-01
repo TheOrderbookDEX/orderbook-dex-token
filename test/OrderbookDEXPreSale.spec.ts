@@ -31,14 +31,14 @@ describe('OrderbookDEXPreSale', () => {
                 } else {
                     it('should deploy with the provided token', async (test) => {
                         const preSale = await test.execute();
-                        expect(await preSale.token())
-                            .to.be.equal(scenario.token);
+                        expect((await preSale.token()).toUpperCase())
+                            .to.be.equal(scenario.token.toUpperCase());
                     });
 
                     it('should deploy with the provided treasury', async (test) => {
                         const preSale = await test.execute();
-                        expect(await preSale.treasury())
-                            .to.be.equal(scenario.treasury);
+                        expect((await preSale.treasury()).toUpperCase())
+                            .to.be.equal(scenario.treasury.toUpperCase());
                     });
 
                     it('should deploy with the provided start time', async (test) => {
