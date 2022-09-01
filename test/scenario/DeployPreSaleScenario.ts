@@ -25,7 +25,7 @@ export interface DeployPreSaleScenarioProperties extends TestScenarioProperties<
 export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, OrderbookDEXPreSale, string> {
     static readonly DEFAULT_TOKEN = '0x1000000000000000000000000000000000000001';
     static readonly DEFAULT_TREASURY = '0x1000000000000000000000000000000000000002';
-    static readonly DEFAULT_START_TIME_OFFSET = 0n;
+    static readonly DEFAULT_START_TIME_OFFSET = ONE_HOUR;
     static readonly DEFAULT_END_TIME_OFFSET = ONE_HOUR;
     static readonly DEFAULT_RELEASE_TIME_OFFSET = ONE_HOUR;
     static readonly DEFAULT_EXCHANGE_RATE: Readonly<ExchangeRate> = new ExchangeRate(1n, 1n);

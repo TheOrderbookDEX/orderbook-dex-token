@@ -3,6 +3,7 @@ import { ConfigurableDescriber } from '@theorderbookdex/contract-test-helper';
 import { ExchangeRate } from '../../src/OrderbookDEXPreSale';
 import { BuyPreSaleAction } from '../action/BuyPreSaleAction';
 import { FastForwardToReleaseAction } from '../action/FastForwardToReleaseAction';
+import { FastForwardToStartAction } from '../action/FastForwardToStartAction';
 import { FastForwardToVestingAction } from '../action/FastForwardToVestingAction';
 import { BuyPreSaleScenario } from '../scenario/BuyPreSaleScenario';
 import { ClaimPreSaleScenario } from '../scenario/ClaimPreSaleScenario';
@@ -101,6 +102,10 @@ describer.addDescriber(BuyPreSaleAction, ({
     value
 }) => {
     return `buy using ${formatValue(value)} ETH`;
+});
+
+describer.addDescriber(FastForwardToStartAction, () => {
+    return `fast forward to start`;
 });
 
 describer.addDescriber(FastForwardToReleaseAction, () => {
