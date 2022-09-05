@@ -148,9 +148,10 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
             revert NotReleased();
         }
 
+        uint256 availableRatio = _availableAtRelease
+            + (currentTime - _releaseTime) / _vestingPeriod * _vestedAmountPerPeriod;
         uint256 amountSold_ = _amountSold[msg.sender];
-        uint256 available = amountSold_ * _availableAtRelease / 1e18;
-        available += (currentTime - _releaseTime) / _vestingPeriod * (amountSold_ * _vestedAmountPerPeriod / 1e18);
+        uint256 available = amountSold_ * availableRatio / 1e18;
         if (available > amountSold_) {
             available = amountSold_;
         }
