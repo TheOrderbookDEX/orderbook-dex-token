@@ -29,6 +29,12 @@
 			"type": "npm",
 			"script": "lint",
 			"problemMatcher": "$eslint-stylish"
-		}
+		},
+		{
+			"label": "Type Check",
+            "type": "typescript",
+            "tsconfig": "tsconfig.json",
+            "problemMatcher": "$tsc",
+        }
 	]
 }
