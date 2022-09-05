@@ -1,10 +1,11 @@
-import { parseValue } from '@theorderbookdex/abi2ts-lib';
 import { generatorChain } from '@theorderbookdex/contract-test-helper';
 import { describer } from '../describer/describer';
 import { DeployPreSaleScenario, DeployPreSaleScenarioProperties } from '../scenario/DeployPreSaleScenario';
+import { ETHER } from '../utils/eth-units';
 import { ONE_DAY } from '../utils/timestamp';
 
 export const deployPreSaleScenarios: Iterable<DeployPreSaleScenario> = generatorChain(function*(): Iterable<DeployPreSaleScenarioProperties> {
+    // MAIN SCENARIOS
     yield {
         describer,
     };
@@ -30,11 +31,11 @@ export const deployPreSaleScenarios: Iterable<DeployPreSaleScenario> = generator
     };
     yield {
         describer,
-        exchangeRate: parseValue(10),
+        exchangeRate: ETHER * 10n,
     };
     yield {
         describer,
-        availableAtRelease: parseValue(0.1),
+        availableAtRelease: ETHER / 10n,
     };
     yield {
         describer,
@@ -42,10 +43,10 @@ export const deployPreSaleScenarios: Iterable<DeployPreSaleScenario> = generator
     };
     yield {
         describer,
-        vestedAmountPerPeriod: parseValue(0.1),
+        vestedAmountPerPeriod: ETHER / 10n,
     };
 
-    // ERRORS
+    // ERROR SCENARIOS
     yield {
         describer,
         endTimeOffset: 0n,

@@ -114,7 +114,7 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
         if (currentTime < _startTime) {
             revert NotStarted();
         }
-        if (currentTime > _endTime) {
+        if (currentTime >= _endTime) {
             revert Ended();
         }
 

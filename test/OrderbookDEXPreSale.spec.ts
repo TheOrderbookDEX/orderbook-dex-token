@@ -6,8 +6,9 @@ import { IOrderbookDEXToken } from '../src/interfaces/IOrderbookDEXToken';
 import { buyPreSaleScenarios } from './scenarios/buyPreSaleScenarios';
 import { claimPreSaleScenarios } from './scenarios/claimPreSaleScenarios';
 import { deployPreSaleScenarios } from './scenarios/deployPreSaleScenarios';
+import { ETHER } from './utils/eth-units';
 import { transactionCost } from './utils/ethereum';
-import { E18, min } from './utils/math';
+import { min } from './utils/math';
 
 chai.use(chaiAsPromised);
 
@@ -104,15 +105,19 @@ describe('OrderbookDEXPreSale', () => {
 
                 } else {
                     it('should return amount bought', async (test) => {
+                        const { preSale } = test;
+                        const token = IOrderbookDEXToken.at(await preSale.token());
+                        const available = await token.balanceOf(preSale) - await preSale.totalSold();
                         const [ amountBought ] = await test.executeStatic();
+                        const expectedAmountBought = min(scenario.value * scenario.exchangeRate / ETHER, available);
                         expect(amountBought)
-                            .to.be.equal(scenario.value * scenario.exchangeRate / E18);
+                            .to.be.equal(expectedAmountBought);
                     });
 
                     it('should return amount paid', async (test) => {
                         const [ amountBought, amountPaid ] = await test.executeStatic();
                         expect(amountPaid)
-                            .to.be.equal(amountBought * E18 / scenario.exchangeRate);
+                            .to.be.equal(amountBought * ETHER / scenario.exchangeRate);
                     });
 
                     it('should transfer amount paid to treasury', async (test) => {
@@ -177,7 +182,7 @@ describe('OrderbookDEXPreSale', () => {
                         const vestingPeriod = await preSale.vestingPeriod();
                         const vestedAmountPerPeriod = await preSale.vestedAmountPerPeriod();
                         const availableRatio = availableAtRelease + (timestamp - releaseTime) / vestingPeriod * vestedAmountPerPeriod;
-                        const amountAvailable = min(amountBought * availableRatio / E18, amountBought);
+                        const amountAvailable = min(amountBought * availableRatio / ETHER, amountBought);
                         const amountClaimedBefore = await preSale.amountClaimed(mainAccount);
                         const amountClaimed = await test.executeStatic();
                         expect(amountClaimed)

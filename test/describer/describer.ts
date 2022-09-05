@@ -1,6 +1,7 @@
 import { formatValue } from '@theorderbookdex/abi2ts-lib';
 import { ConfigurableDescriber } from '@theorderbookdex/contract-test-helper';
 import { BuyPreSaleAction } from '../action/BuyPreSaleAction';
+import { FastForwardToEndAction } from '../action/FastForwardToEndAction';
 import { FastForwardToReleaseAction } from '../action/FastForwardToReleaseAction';
 import { FastForwardToStartAction } from '../action/FastForwardToStartAction';
 import { FastForwardToVestingAction } from '../action/FastForwardToVestingAction';
@@ -105,6 +106,10 @@ describer.addDescriber(BuyPreSaleAction, ({
 
 describer.addDescriber(FastForwardToStartAction, () => {
     return `fast forward to start`;
+});
+
+describer.addDescriber(FastForwardToEndAction, () => {
+    return `fast forward to end`;
 });
 
 describer.addDescriber(FastForwardToReleaseAction, () => {
