@@ -1,6 +1,4 @@
 import { formatValue } from '@theorderbookdex/abi2ts-lib';
-import { ExchangeRate } from '../../src/OrderbookDEXPreSale';
-import { E18 } from './math';
 import { ONE_DAY, ONE_HOUR, ONE_MINUTE } from './timestamp';
 
 export function formatTimeOffset(offset: bigint, from = 'now'): string {
@@ -36,7 +34,6 @@ export function formatTimePeriod(timePeriod: bigint): string {
     return formatted.join(' ');
 }
 
-export function formatExchangeRate(exchangeRate: ExchangeRate): string {
-    if (!exchangeRate.givenAmount) return 'NaN';
-    return formatValue(E18 * exchangeRate.receivedAmount / exchangeRate.givenAmount);
+export function formatExchangeRate(exchangeRate: bigint): string {
+    return formatValue(exchangeRate);
 }

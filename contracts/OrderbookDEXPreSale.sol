@@ -3,7 +3,7 @@
 pragma solidity 0.8.15;
 
 import { IOrderbookDEXToken } from "./interfaces/IOrderbookDEXToken.sol";
-import { IOrderbookDEXPreSale, ExchangeRate } from "./interfaces/IOrderbookDEXPreSale.sol";
+import { IOrderbookDEXPreSale } from "./interfaces/IOrderbookDEXPreSale.sol";
 
 // TODO pre-sale stages
 
@@ -37,9 +37,9 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
     uint256 private immutable _releaseTime;
 
     /**
-     * The exchange rate.
+     * The exchange rate as amount of tokens received per 1 ether.
      */
-    ExchangeRate private /*immutable*/ _exchangeRate;
+    uint256 private immutable _exchangeRate;
 
     /**
      * The amount of tokens available at release per 1e18 tokens bought.
@@ -82,20 +82,19 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
      * @param exchangeRate_ the exchange rate
      */
     constructor(
-        IOrderbookDEXToken  token_,
-        address payable     treasury_,
-        uint256             startTime_,
-        uint256             endTime_,
-        uint256             releaseTime_,
-        ExchangeRate memory exchangeRate_,
-        uint256             availableAtRelease_,
-        uint256             vestingPeriod_,
-        uint256             vestedAmountPerPeriod_
+        IOrderbookDEXToken token_,
+        address payable    treasury_,
+        uint256            startTime_,
+        uint256            endTime_,
+        uint256            releaseTime_,
+        uint256            exchangeRate_,
+        uint256            availableAtRelease_,
+        uint256            vestingPeriod_,
+        uint256            vestedAmountPerPeriod_
     ) {
         require(startTime_ < endTime_);
         require(endTime_ < releaseTime_);
-        require(exchangeRate_.receivedAmount > 0);
-        require(exchangeRate_.givenAmount > 0);
+        require(exchangeRate_ > 0);
         require(vestingPeriod_ > 0);
         require(vestedAmountPerPeriod_ > 0);
 
@@ -124,15 +123,15 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
             revert SoldOut();
         }
 
-        ExchangeRate memory exchangeRate_ = _exchangeRate;
-        amountBought = msg.value * exchangeRate_.receivedAmount / exchangeRate_.givenAmount;
+        uint256 exchangeRate_ = _exchangeRate;
+        amountBought = msg.value * exchangeRate_ / 1 ether;
         if (amountBought == 0) {
             revert NotEnoughFunds();
         }
         if (amountBought > amountAvailable) {
             amountBought = amountAvailable;
         }
-        amountPaid = amountBought * exchangeRate_.givenAmount / exchangeRate_.receivedAmount;
+        amountPaid = amountBought * 1 ether / exchangeRate_;
 
         _amountSold[msg.sender] += amountBought;
         _totalSold += amountBought;
@@ -188,7 +187,7 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
         return _releaseTime;
     }
 
-    function exchangeRate() external view returns (ExchangeRate memory) {
+    function exchangeRate() external view returns (uint256) {
         return _exchangeRate;
     }
 

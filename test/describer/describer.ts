@@ -1,6 +1,5 @@
 import { formatValue } from '@theorderbookdex/abi2ts-lib';
 import { ConfigurableDescriber } from '@theorderbookdex/contract-test-helper';
-import { ExchangeRate } from '../../src/OrderbookDEXPreSale';
 import { BuyPreSaleAction } from '../action/BuyPreSaleAction';
 import { FastForwardToReleaseAction } from '../action/FastForwardToReleaseAction';
 import { FastForwardToStartAction } from '../action/FastForwardToStartAction';
@@ -20,7 +19,7 @@ function describePreSaleSettings({
     startTimeOffset: bigint,
     endTimeOffset: bigint,
     releaseTimeOffset: bigint,
-    exchangeRate: Readonly<ExchangeRate>,
+    exchangeRate: bigint,
     availableAtRelease: bigint,
     vestingPeriod: bigint,
     vestedAmountPerPeriod: bigint

@@ -5,21 +5,6 @@ pragma solidity 0.8.15;
 import { IOrderbookDEXToken } from "./IOrderbookDEXToken.sol";
 
 /**
- * Exchange rate.
- */
-struct ExchangeRate {
-    /**
-     * Amount received.
-     */
-    uint128 receivedAmount;
-
-    /**
-     * Amount given.
-     */
-    uint128 givenAmount;
-}
-
-/**
  * The Orderbook DEX Token pre-sale.
  */
 interface IOrderbookDEXPreSale {
@@ -106,11 +91,11 @@ interface IOrderbookDEXPreSale {
     function releaseTime() external view returns (uint256 releaseTime);
 
     /**
-     * The exchange rate.
+     * The exchange rate as amount of tokens received per 1 ether.
      *
-     * @return exchangeRate the exchange rate
+     * @return exchangeRate the exchange rate as amount of tokens received per 1 ether
      */
-    function exchangeRate() external view returns (ExchangeRate memory exchangeRate);
+    function exchangeRate() external view returns (uint256 exchangeRate);
 
     /**
      * The total amount sold.

@@ -62,10 +62,8 @@ describe('OrderbookDEXPreSale', () => {
                     it('should deploy with the provided exchange rate', async (test) => {
                         const preSale = await test.execute();
                         const exchangeRate = await preSale.exchangeRate();
-                        expect(exchangeRate.givenAmount)
-                            .to.be.equal(scenario.exchangeRate.givenAmount);
-                        expect(exchangeRate.receivedAmount)
-                            .to.be.equal(scenario.exchangeRate.receivedAmount);
+                        expect(exchangeRate)
+                            .to.be.equal(scenario.exchangeRate);
                     });
 
                     it('should deploy with the provided amount available at release', async (test) => {
@@ -108,13 +106,13 @@ describe('OrderbookDEXPreSale', () => {
                     it('should return amount bought', async (test) => {
                         const [ amountBought ] = await test.executeStatic();
                         expect(amountBought)
-                            .to.be.equal(scenario.value * scenario.exchangeRate.receivedAmount / scenario.exchangeRate.givenAmount);
+                            .to.be.equal(scenario.value * scenario.exchangeRate / E18);
                     });
 
                     it('should return amount paid', async (test) => {
                         const [ amountBought, amountPaid ] = await test.executeStatic();
                         expect(amountPaid)
-                            .to.be.equal(amountBought * scenario.exchangeRate.givenAmount / scenario.exchangeRate.receivedAmount);
+                            .to.be.equal(amountBought * E18 / scenario.exchangeRate);
                     });
 
                     it('should transfer amount paid to treasury', async (test) => {

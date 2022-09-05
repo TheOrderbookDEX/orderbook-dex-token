@@ -1,6 +1,6 @@
 import { formatValue, parseValue } from '@theorderbookdex/abi2ts-lib';
 import { AddContextFunction, BaseTestContext, now, TestScenario, TestScenarioProperties } from '@theorderbookdex/contract-test-helper';
-import { ExchangeRate, OrderbookDEXPreSale } from '../../src/OrderbookDEXPreSale';
+import { OrderbookDEXPreSale } from '../../src/OrderbookDEXPreSale';
 import { formatExchangeRate, formatTimeOffset, formatTimePeriod } from '../utils/format';
 import { ONE_HOUR } from '../utils/timestamp';
 
@@ -16,7 +16,7 @@ export interface DeployPreSaleScenarioProperties extends TestScenarioProperties<
     readonly startTimeOffset?: bigint;
     readonly endTimeOffset?: bigint;
     readonly releaseTimeOffset?: bigint;
-    readonly exchangeRate?: Readonly<ExchangeRate>;
+    readonly exchangeRate?: bigint;
     readonly availableAtRelease?: bigint;
     readonly vestingPeriod?: bigint;
     readonly vestedAmountPerPeriod?: bigint;
@@ -28,7 +28,7 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     static readonly DEFAULT_START_TIME_OFFSET = ONE_HOUR;
     static readonly DEFAULT_END_TIME_OFFSET = ONE_HOUR;
     static readonly DEFAULT_RELEASE_TIME_OFFSET = ONE_HOUR;
-    static readonly DEFAULT_EXCHANGE_RATE: Readonly<ExchangeRate> = new ExchangeRate(1n, 1n);
+    static readonly DEFAULT_EXCHANGE_RATE: bigint = parseValue(1);
     static readonly DEFAULT_AVAILABLE_AT_RELEASE = 0n;
     static readonly DEFAULT_VESTING_PERIOD = ONE_HOUR;
     static readonly DEFAULT_VESTED_AMOUNT_PER_PERIOD = parseValue(1);
@@ -38,7 +38,7 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     readonly startTimeOffset: bigint;
     readonly endTimeOffset: bigint;
     readonly releaseTimeOffset: bigint;
-    readonly exchangeRate: Readonly<ExchangeRate>;
+    readonly exchangeRate: bigint;
     readonly availableAtRelease: bigint;
     readonly vestingPeriod: bigint;
     readonly vestedAmountPerPeriod: bigint;

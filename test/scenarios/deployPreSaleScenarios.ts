@@ -1,6 +1,5 @@
 import { parseValue } from '@theorderbookdex/abi2ts-lib';
 import { generatorChain } from '@theorderbookdex/contract-test-helper';
-import { ExchangeRate } from '../../src/OrderbookDEXPreSale';
 import { describer } from '../describer/describer';
 import { DeployPreSaleScenario, DeployPreSaleScenarioProperties } from '../scenario/DeployPreSaleScenario';
 import { ONE_DAY } from '../utils/timestamp';
@@ -31,7 +30,7 @@ export const deployPreSaleScenarios: Iterable<DeployPreSaleScenario> = generator
     };
     yield {
         describer,
-        exchangeRate: new ExchangeRate(10n, 1n),
+        exchangeRate: parseValue(10),
     };
     yield {
         describer,
@@ -59,12 +58,7 @@ export const deployPreSaleScenarios: Iterable<DeployPreSaleScenario> = generator
     };
     yield {
         describer,
-        exchangeRate: new ExchangeRate(0n, 1n),
-        expectedError: Error,
-    };
-    yield {
-        describer,
-        exchangeRate: new ExchangeRate(1n, 0n),
+        exchangeRate: 0n,
         expectedError: Error,
     };
     yield {

@@ -1,6 +1,6 @@
 import { AddContextFunction, BaseTestContext, now, TestScenario, TestScenarioProperties } from '@theorderbookdex/contract-test-helper';
 import { OrderbookDEXToken } from '../../src/OrderbookDEXToken';
-import { ExchangeRate, OrderbookDEXPreSale } from '../../src/OrderbookDEXPreSale';
+import { OrderbookDEXPreSale } from '../../src/OrderbookDEXPreSale';
 import { formatExchangeRate, formatTimeOffset, formatTimePeriod } from '../utils/format';
 import { predictContractAddress } from '../utils/ethereum';
 import { formatValue } from '@theorderbookdex/abi2ts-lib';
@@ -17,7 +17,7 @@ export interface PreSaleScenarioProperties<TestContext extends PreSaleContext>
     readonly startTimeOffset?: bigint;
     readonly endTimeOffset?: bigint;
     readonly releaseTimeOffset?: bigint;
-    readonly exchangeRate?: Readonly<ExchangeRate>;
+    readonly exchangeRate?: bigint;
     readonly availableAtRelease?: bigint;
     readonly vestingPeriod?: bigint;
     readonly vestedAmountPerPeriod?: bigint;
@@ -29,7 +29,7 @@ export abstract class PreSaleScenario<TestContext extends PreSaleContext, Execut
     readonly startTimeOffset: bigint;
     readonly endTimeOffset: bigint;
     readonly releaseTimeOffset: bigint;
-    readonly exchangeRate: Readonly<ExchangeRate>;
+    readonly exchangeRate: bigint;
     readonly availableAtRelease: bigint;
     readonly vestingPeriod: bigint;
     readonly vestedAmountPerPeriod: bigint;
