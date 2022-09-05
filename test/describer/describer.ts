@@ -1,6 +1,7 @@
 import { formatValue } from '@theorderbookdex/abi2ts-lib';
 import { ConfigurableDescriber } from '@theorderbookdex/contract-test-helper';
 import { BuyPreSaleAction } from '../action/BuyPreSaleAction';
+import { ClaimPreSaleAction } from '../action/ClaimPreSaleAction';
 import { FastForwardToEndAction } from '../action/FastForwardToEndAction';
 import { FastForwardToReleaseAction } from '../action/FastForwardToReleaseAction';
 import { FastForwardToStartAction } from '../action/FastForwardToStartAction';
@@ -102,6 +103,10 @@ describer.addDescriber(BuyPreSaleAction, ({
     value
 }) => {
     return `buy using ${formatValue(value)} ETH`;
+});
+
+describer.addDescriber(ClaimPreSaleAction, () => {
+    return `claim`;
 });
 
 describer.addDescriber(FastForwardToStartAction, () => {
