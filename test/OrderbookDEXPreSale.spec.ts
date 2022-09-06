@@ -6,6 +6,7 @@ import { IOrderbookDEXToken } from '../src/interfaces/IOrderbookDEXToken';
 import { buyPreSaleScenarios } from './scenarios/buyPreSaleScenarios';
 import { claimPreSaleScenarios } from './scenarios/claimPreSaleScenarios';
 import { deployPreSaleScenarios } from './scenarios/deployPreSaleScenarios';
+import { withdrawPreSaleScenarios } from './scenarios/withdrawPreSaleScenarios';
 import { ETHER } from './utils/eth-units';
 import { transactionCost } from './utils/ethereum';
 import { min } from './utils/math';
@@ -127,21 +128,22 @@ describe('OrderbookDEXPreSale', () => {
                             .to.be.equal(amountBought * ETHER / scenario.exchangeRate);
                     });
 
-                    it('should transfer amount paid to treasury', async (test) => {
+                    it('should increase eth balance by amount paid', async (test) => {
+                        const { preSale } = test;
                         const [ , amountPaid ] = await test.executeStatic();
-                        const treasury = await test.preSale.treasury();
-                        const expectedBalance = await getBalance(treasury) + amountPaid;
+                        const expectedBalance = await getBalance(preSale.address) + amountPaid;
                         await test.execute();
-                        expect(await getBalance(treasury))
+                        expect(await getBalance(preSale.address))
                             .to.be.equal(expectedBalance);
                     });
 
                     it('should return unused funds to buyer', async (test) => {
+                        const { mainAccount } = test;
                         const [ , amountPaid ] = await test.executeStatic();
-                        const prevBalance = await getBalance(test.mainAccount);
+                        const prevBalance = await getBalance(mainAccount);
                         const tx = await test.execute();
                         const txCost = transactionCost(tx);
-                        expect(await getBalance(test.mainAccount))
+                        expect(await getBalance(mainAccount))
                             .to.be.equal(prevBalance - txCost - amountPaid);
                     });
 
@@ -213,6 +215,43 @@ describe('OrderbookDEXPreSale', () => {
                         await test.execute();
                         expect(await preSale.amountClaimed(test.mainAccount))
                             .to.be.equal(expectedAmountClaimed);
+                    });
+                }
+            });
+        }
+    });
+
+    describe('withdraw', () => {
+        for (const scenario of withdrawPreSaleScenarios) {
+            scenario.describe(({ it }) => {
+                if (scenario.expectedError) {
+                    it('should fail', async (test) => {
+                        await expect(test.execute())
+                            .to.be.rejected;
+                    });
+
+                    it(`should fail with ${describeError(scenario.expectedError)}`, async (test) => {
+                        await expect(test.executeStatic())
+                            .to.be.rejectedWith(scenario.expectedError as typeof Error);
+                    });
+
+                } else {
+                    it('should return amount withdrawn', async (test) => {
+                        const { preSale } = test;
+                        const expectedAmountWithdrawn = await getBalance(preSale.address);
+                        const amountWithdrawn = await test.executeStatic();
+                        expect(amountWithdrawn)
+                            .to.be.equal(expectedAmountWithdrawn);
+                    });
+
+                    it('should transfer amount withdrawn to sender', async (test) => {
+                        const { mainAccount } = test;
+                        const amountWithdrawn = await test.executeStatic();
+                        const prevBalance = await getBalance(mainAccount);
+                        const tx = await test.execute();
+                        const txCost = transactionCost(tx);
+                        expect(await getBalance(mainAccount))
+                            .to.be.equal(prevBalance - txCost + amountWithdrawn);
                     });
                 }
             });

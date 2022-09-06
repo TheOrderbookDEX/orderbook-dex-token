@@ -82,6 +82,7 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
         addContext('available at release', formatValue(this.availableAtRelease));
         addContext('vesting period', formatTimePeriod(this.vestingPeriod));
         addContext('vested amount per period', formatValue(this.vestedAmountPerPeriod));
+        addContext('buy limit', formatValue(this.buyLimit));
         super.addContext(addContext);
     }
 

@@ -14,6 +14,7 @@ export interface PreSaleContext extends BaseTestContext {
 export interface PreSaleScenarioProperties<TestContext extends PreSaleContext>
     extends TestScenarioProperties<TestContext>
 {
+    readonly treasury?: string;
     readonly startTimeOffset?: bigint;
     readonly endTimeOffset?: bigint;
     readonly releaseTimeOffset?: bigint;
@@ -27,6 +28,7 @@ export interface PreSaleScenarioProperties<TestContext extends PreSaleContext>
 export abstract class PreSaleScenario<TestContext extends PreSaleContext, ExecuteResult, ExecuteStaticResult>
     extends TestScenario<TestContext, ExecuteResult, ExecuteStaticResult>
 {
+    readonly treasury?: string;
     readonly startTimeOffset: bigint;
     readonly endTimeOffset: bigint;
     readonly releaseTimeOffset: bigint;
@@ -37,6 +39,7 @@ export abstract class PreSaleScenario<TestContext extends PreSaleContext, Execut
     readonly buyLimit: bigint;
 
     constructor({
+        treasury,
         startTimeOffset       = DeployPreSaleScenario.DEFAULT_START_TIME_OFFSET,
         endTimeOffset         = DeployPreSaleScenario.DEFAULT_END_TIME_OFFSET,
         releaseTimeOffset     = DeployPreSaleScenario.DEFAULT_RELEASE_TIME_OFFSET,
@@ -48,6 +51,7 @@ export abstract class PreSaleScenario<TestContext extends PreSaleContext, Execut
         ...rest
     }: PreSaleScenarioProperties<TestContext>) {
         super(rest);
+        this.treasury              = treasury;
         this.startTimeOffset       = startTimeOffset;
         this.endTimeOffset         = endTimeOffset;
         this.releaseTimeOffset     = releaseTimeOffset;
@@ -59,6 +63,9 @@ export abstract class PreSaleScenario<TestContext extends PreSaleContext, Execut
     }
 
     addContext(addContext: AddContextFunction): void {
+        if (this.treasury) {
+            addContext('treasury address', this.treasury);
+        }
         addContext('start time', formatTimeOffset(this.startTimeOffset));
         addContext('end time', formatTimeOffset(this.endTimeOffset, 'startTime'));
         addContext('release time', formatTimeOffset(this.releaseTimeOffset, 'endTime'));
@@ -66,6 +73,7 @@ export abstract class PreSaleScenario<TestContext extends PreSaleContext, Execut
         addContext('available at release', formatValue(this.availableAtRelease));
         addContext('vesting period', formatTimePeriod(this.vestingPeriod));
         addContext('vested amount per period', formatValue(this.vestedAmountPerPeriod));
+        addContext('buy limit', formatValue(this.buyLimit));
         super.addContext(addContext);
     }
 
@@ -74,7 +82,7 @@ export abstract class PreSaleScenario<TestContext extends PreSaleContext, Execut
         const startTime = now() + this.startTimeOffset;
         const endTime = startTime + this.endTimeOffset;
         const releaseTime = endTime + this.releaseTimeOffset;
-        const treasury = '0x1000000000000000000000000000000000000001';
+        const treasury = this.treasury ?? ctx.mainAccount;
         const seed = '0x1000000000000000000000000000000000000002';
         const publicSale = '0x1000000000000000000000000000000000000003';
         const preSaleAddress = await predictContractAddress(1);

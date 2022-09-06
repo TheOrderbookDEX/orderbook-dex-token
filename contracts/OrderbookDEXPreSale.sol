@@ -158,7 +158,6 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
         _amountSold[msg.sender] += amountBought;
         _totalSold += amountBought;
 
-        _treasury.transfer(amountPaid);
         if (msg.value > amountPaid) {
             payable(msg.sender).transfer(msg.value - amountPaid);
         }
@@ -188,6 +187,25 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
         _token.transfer(msg.sender, available);
 
         return available;
+    }
+
+    function withdraw() external returns (uint256) {
+        if (msg.sender != _treasury) {
+            revert Unauthorized();
+        }
+
+        uint256 currentTime = block.timestamp;
+        if (currentTime < _endTime) {
+            revert NotEnded();
+        }
+
+        uint256 amountWithdrawn = address(this).balance;
+        if (amountWithdrawn == 0) {
+            revert NothingToWithdraw();
+        }
+
+        _treasury.transfer(amountWithdrawn);
+        return amountWithdrawn;
     }
 
     function token() external view returns (IOrderbookDEXToken) {

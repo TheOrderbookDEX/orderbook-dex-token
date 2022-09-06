@@ -44,6 +44,21 @@ interface IOrderbookDEXPreSale {
     error BuyLimitReached();
 
     /**
+     * Error thrown when a function is called by someone not authorized o do so.
+     */
+    error Unauthorized();
+
+    /**
+     * Error thrown when the pre-sale hasn't ended yet.
+     */
+    error NotEnded();
+
+    /**
+     * Error thrown when there are no eth to withdraw.
+     */
+    error NothingToWithdraw();
+
+    /**
      * Buy tokens.
      *
      * Amount of tokens bought is determined by eth sent and tokens available.
@@ -56,9 +71,18 @@ interface IOrderbookDEXPreSale {
     /**
      * Claim tokens.
      *
-     * @return amount the amount of tokens claimed
+     * @return amountClaimed the amount of tokens claimed
      */
-    function claim() external returns (uint256 amount);
+    function claim() external returns (uint256 amountClaimed);
+
+    /**
+     * Withdraw eth from the pre-sale contract.
+     *
+     * This can only be called by the treasury and after the pre-sale has ended.
+     *
+     * @return amountWithdrawn the amount withdrawn
+     */
+    function withdraw() external returns (uint256 amountWithdrawn);
 
     /**
      * The Orderbook DEX token.

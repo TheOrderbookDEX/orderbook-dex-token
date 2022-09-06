@@ -6,9 +6,11 @@ import { FastForwardToEndAction } from '../action/FastForwardToEndAction';
 import { FastForwardToReleaseAction } from '../action/FastForwardToReleaseAction';
 import { FastForwardToStartAction } from '../action/FastForwardToStartAction';
 import { FastForwardToVestingAction } from '../action/FastForwardToVestingAction';
+import { WithdrawPreSaleAction } from '../action/WithdrawPreSaleAction';
 import { BuyPreSaleScenario } from '../scenario/BuyPreSaleScenario';
 import { ClaimPreSaleScenario } from '../scenario/ClaimPreSaleScenario';
 import { DeployPreSaleScenario } from '../scenario/DeployPreSaleScenario';
+import { WithdrawPreSaleScenario } from '../scenario/WithdrawPreSaleScenario';
 import { formatExchangeRate, formatTimeOffset, formatTimePeriod } from '../utils/format';
 
 export const describer = new ConfigurableDescriber<void>();
@@ -104,6 +106,18 @@ describer.addDescriber(ClaimPreSaleScenario, ({
     return description.join(' ');
 });
 
+describer.addDescriber(WithdrawPreSaleScenario, ({
+    setupActions, ...settings
+}) => {
+    const description = ['withdraw'];
+    for (const [ index, action ] of setupActions.entries()) {
+        description.push(index == 0 ? 'after' : 'and');
+        description.push(action.description);
+    }
+    description.push(...describePreSaleSettings(settings));
+    return description.join(' ');
+});
+
 describer.addDescriber(BuyPreSaleAction, ({
     value
 }) => {
@@ -112,6 +126,10 @@ describer.addDescriber(BuyPreSaleAction, ({
 
 describer.addDescriber(ClaimPreSaleAction, () => {
     return `claim`;
+});
+
+describer.addDescriber(WithdrawPreSaleAction, () => {
+    return `withdraw`;
 });
 
 describer.addDescriber(FastForwardToStartAction, () => {
