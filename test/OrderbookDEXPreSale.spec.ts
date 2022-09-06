@@ -148,19 +148,39 @@ describe('OrderbookDEXPreSale', () => {
                     });
 
                     it('should increase total amount sold', async (test) => {
+                        const { preSale } = test;
                         const [ amountBought ] = await test.executeStatic();
-                        const expectedTotalSold = await test.preSale.totalSold() + amountBought;
+                        const expectedTotalSold = await preSale.totalSold() + amountBought;
                         await test.execute();
-                        expect(await test.preSale.totalSold())
+                        expect(await preSale.totalSold())
                             .to.be.equal(expectedTotalSold);
                     });
 
                     it('should increase amount sold for buyer', async (test) => {
+                        const { preSale, mainAccount } = test;
                         const [ amountBought ] = await test.executeStatic();
-                        const expectedAmountSold = await test.preSale.amountSold(test.mainAccount) + amountBought;
+                        const expectedAmountSold = await preSale.amountSold(mainAccount) + amountBought;
                         await test.execute();
-                        expect(await test.preSale.amountSold(test.mainAccount))
+                        expect(await preSale.amountSold(mainAccount))
                             .to.be.equal(expectedAmountSold);
+                    });
+
+                    it('should increase total amount paid', async (test) => {
+                        const { preSale } = test;
+                        const [ , amountPaid ] = await test.executeStatic();
+                        const expectedTotalPaid = await preSale.totalPaid() + amountPaid;
+                        await test.execute();
+                        expect(await preSale.totalPaid())
+                            .to.be.equal(expectedTotalPaid);
+                    });
+
+                    it('should increase amount paid for buyer', async (test) => {
+                        const { preSale, mainAccount } = test;
+                        const [ , amountPaid ] = await test.executeStatic();
+                        const expectedAmountPaid = await preSale.amountPaid(mainAccount) + amountPaid;
+                        await test.execute();
+                        expect(await preSale.amountPaid(mainAccount))
+                            .to.be.equal(expectedAmountPaid);
                     });
                 }
             });
@@ -219,6 +239,10 @@ describe('OrderbookDEXPreSale', () => {
                 }
             });
         }
+    });
+
+    describe('cancel', () => {
+        // TODO test cancel pre-sale
     });
 
     describe('withdraw', () => {

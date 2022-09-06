@@ -72,6 +72,16 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
     mapping(address => uint256) _amountSold;
 
     /**
+     * The total amount paid by all buyers.
+     */
+    uint256 private _totalPaid;
+
+    /**
+     * The amount paid by an account.
+     */
+    mapping(address => uint256) _amountPaid;
+
+    /**
      * The amount claimed by an account.
      */
     mapping(address => uint256) _amountClaimed;
@@ -121,7 +131,7 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
         _buyLimit              = buyLimit_;
     }
 
-    function buy() external payable returns (uint256 amountBought, uint256 amountPaid) {
+    function buy() external payable returns (uint256 amountBought, uint256 amountPaid_) {
         uint256 currentTime = block.timestamp;
         if (currentTime < _startTime) {
             revert NotStarted();
@@ -153,13 +163,16 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
             amountBought = buyLimit_;
         }
 
-        amountPaid = amountBought * 1 ether / exchangeRate_;
+        amountPaid_ = amountBought * 1 ether / exchangeRate_;
 
         _amountSold[msg.sender] += amountBought;
         _totalSold += amountBought;
 
-        if (msg.value > amountPaid) {
-            payable(msg.sender).transfer(msg.value - amountPaid);
+        _amountPaid[msg.sender] += amountPaid_;
+        _totalPaid += amountPaid_;
+
+        if (msg.value > amountPaid_) {
+            payable(msg.sender).transfer(msg.value - amountPaid_);
         }
     }
 
@@ -187,6 +200,28 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
         _token.transfer(msg.sender, available);
 
         return available;
+    }
+
+    function cancel() external returns (uint256 amountReturned, uint256 amountRefunded) {
+        uint256 currentTime = block.timestamp;
+        if (currentTime >= _endTime) {
+            revert Ended();
+        }
+
+        amountReturned = _amountSold[msg.sender];
+        amountRefunded = _amountPaid[msg.sender];
+
+        if (amountRefunded == 0) {
+            revert NothingToCancel();
+        }
+
+        _amountSold[msg.sender] -= amountReturned;
+        _totalSold -= amountReturned;
+
+        _amountPaid[msg.sender] -= amountRefunded;
+        _totalPaid -= amountRefunded;
+
+        payable(msg.sender).transfer(amountRefunded);
     }
 
     function withdraw() external returns (uint256) {
@@ -254,6 +289,14 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
 
     function amountSold(address account) external view returns (uint256) {
         return _amountSold[account];
+    }
+
+    function totalPaid() external view returns (uint256) {
+        return _totalPaid;
+    }
+
+    function amountPaid(address account) external view returns (uint256) {
+        return _amountPaid[account];
     }
 
     function amountClaimed(address account) external view returns (uint256) {

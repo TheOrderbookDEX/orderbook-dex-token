@@ -59,9 +59,16 @@ interface IOrderbookDEXPreSale {
     error NothingToWithdraw();
 
     /**
+     * Error thrown when there are no tokens to cancel.
+     */
+    error NothingToCancel();
+
+    /**
      * Buy tokens.
      *
      * Amount of tokens bought is determined by eth sent and tokens available.
+     *
+     * Can only be called between start time and end time.
      *
      * @return amountBought the amount of tokens bought
      * @return amountPaid   the amount of eth paid
@@ -71,9 +78,21 @@ interface IOrderbookDEXPreSale {
     /**
      * Claim tokens.
      *
+     * Can only be called after release time.
+     *
      * @return amountClaimed the amount of tokens claimed
      */
     function claim() external returns (uint256 amountClaimed);
+
+    /**
+     * Cancel buy.
+     *
+     * Can only be called before end time.
+     *
+     * @return amountReturned the amount of tokens returned
+     * @return amountRefunded the amount of eth refunded
+     */
+    function cancel() external returns (uint256 amountReturned, uint256 amountRefunded);
 
     /**
      * Withdraw eth from the pre-sale contract.
@@ -140,6 +159,21 @@ interface IOrderbookDEXPreSale {
      * @return amountSold the amount sold to the account
      */
     function amountSold(address account) external view returns (uint256 amountSold);
+
+    /**
+     * The total amount paid by all buyers.
+     *
+     * @return totalPaid the total amount paid by all buyers
+     */
+    function totalPaid() external view returns (uint256 totalPaid);
+
+    /**
+     * The amount paid by an account.
+     *
+     * @param  account    the account
+     * @return amountPaid the amount paid by the account
+     */
+    function amountPaid(address account) external view returns (uint256 amountPaid);
 
     /**
      * The amount claimed by an account.
