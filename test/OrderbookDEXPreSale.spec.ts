@@ -95,7 +95,7 @@ describe('OrderbookDEXPreSale', () => {
         }
     });
 
-    describe.only('buy', () => {
+    describe('buy', () => {
         for (const scenario of buyPreSaleScenarios) {
             scenario.describe(({ it }) => {
                 if (scenario.expectedError) {
