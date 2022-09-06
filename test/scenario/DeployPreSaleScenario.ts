@@ -1,4 +1,4 @@
-import { formatValue, parseValue } from '@theorderbookdex/abi2ts-lib';
+import { formatValue, MAX_UINT256, parseValue } from '@theorderbookdex/abi2ts-lib';
 import { AddContextFunction, BaseTestContext, now, TestScenario, TestScenarioProperties } from '@theorderbookdex/contract-test-helper';
 import { OrderbookDEXPreSale } from '../../src/OrderbookDEXPreSale';
 import { formatExchangeRate, formatTimeOffset, formatTimePeriod } from '../utils/format';
@@ -20,6 +20,7 @@ export interface DeployPreSaleScenarioProperties extends TestScenarioProperties<
     readonly availableAtRelease?: bigint;
     readonly vestingPeriod?: bigint;
     readonly vestedAmountPerPeriod?: bigint;
+    readonly buyLimit?: bigint;
 }
 
 export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, OrderbookDEXPreSale, string> {
@@ -32,6 +33,7 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     static readonly DEFAULT_AVAILABLE_AT_RELEASE = 0n;
     static readonly DEFAULT_VESTING_PERIOD = ONE_HOUR;
     static readonly DEFAULT_VESTED_AMOUNT_PER_PERIOD = parseValue(1);
+    static readonly DEFAULT_BUY_LIMIT = MAX_UINT256;
 
     readonly token: string;
     readonly treasury: string;
@@ -42,6 +44,7 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     readonly availableAtRelease: bigint;
     readonly vestingPeriod: bigint;
     readonly vestedAmountPerPeriod: bigint;
+    readonly buyLimit: bigint;
 
     constructor({
         token                 = DeployPreSaleScenario.DEFAULT_TOKEN,
@@ -53,6 +56,7 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
         availableAtRelease    = DeployPreSaleScenario.DEFAULT_AVAILABLE_AT_RELEASE,
         vestingPeriod         = DeployPreSaleScenario.DEFAULT_VESTING_PERIOD,
         vestedAmountPerPeriod = DeployPreSaleScenario.DEFAULT_VESTED_AMOUNT_PER_PERIOD,
+        buyLimit              = DeployPreSaleScenario.DEFAULT_BUY_LIMIT,
         ...rest
     }: DeployPreSaleScenarioProperties) {
         super(rest);
@@ -65,6 +69,7 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
         this.availableAtRelease    = availableAtRelease;
         this.vestingPeriod         = vestingPeriod;
         this.vestedAmountPerPeriod = vestedAmountPerPeriod;
+        this.buyLimit              = buyLimit;
     }
 
     addContext(addContext: AddContextFunction): void {
@@ -93,12 +98,12 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     }
 
     async execute({ startTime, endTime, releaseTime }: DeployPreSaleContext) {
-        const { token, treasury, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod } = this;
-        return await OrderbookDEXPreSale.deploy(token, treasury, startTime, endTime, releaseTime, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod);
+        const { token, treasury, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit } = this;
+        return await OrderbookDEXPreSale.deploy(token, treasury, startTime, endTime, releaseTime, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit);
     }
 
     async executeStatic({ startTime, endTime, releaseTime }: DeployPreSaleContext) {
-        const { token, treasury, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod } = this;
-        return await OrderbookDEXPreSale.callStatic.deploy(token, treasury, startTime, endTime, releaseTime, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod);
+        const { token, treasury, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit } = this;
+        return await OrderbookDEXPreSale.callStatic.deploy(token, treasury, startTime, endTime, releaseTime, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit);
     }
 }

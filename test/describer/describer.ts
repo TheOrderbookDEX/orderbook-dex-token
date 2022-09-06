@@ -14,7 +14,7 @@ import { formatExchangeRate, formatTimeOffset, formatTimePeriod } from '../utils
 export const describer = new ConfigurableDescriber<void>();
 
 function describePreSaleSettings({
-    token, treasury, startTimeOffset, endTimeOffset, releaseTimeOffset, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod
+    token, treasury, startTimeOffset, endTimeOffset, releaseTimeOffset, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit
 }: {
     token?: string,
     treasury?: string,
@@ -24,7 +24,8 @@ function describePreSaleSettings({
     exchangeRate: bigint,
     availableAtRelease: bigint,
     vestingPeriod: bigint,
-    vestedAmountPerPeriod: bigint
+    vestedAmountPerPeriod: bigint,
+    buyLimit: bigint
 }): string[] {
     const description: string[] = [];
     if (token && token != DeployPreSaleScenario.DEFAULT_TOKEN) {
@@ -62,6 +63,10 @@ function describePreSaleSettings({
     if (vestedAmountPerPeriod != DeployPreSaleScenario.DEFAULT_VESTED_AMOUNT_PER_PERIOD) {
         description.push(description.length ? 'and' : 'with');
         description.push(`vestedAmountPerPeriod = ${formatValue(vestedAmountPerPeriod)}`);
+    }
+    if (buyLimit != DeployPreSaleScenario.DEFAULT_BUY_LIMIT) {
+        description.push(description.length ? 'and' : 'with');
+        description.push(`buyLimit = ${formatValue(buyLimit)}`);
     }
     return description;
 }

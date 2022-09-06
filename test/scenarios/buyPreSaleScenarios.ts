@@ -2,11 +2,12 @@ import { generatorChain } from '@theorderbookdex/contract-test-helper';
 import { describer } from '../describer/describer';
 import { BuyPreSaleScenario } from '../scenario/BuyPreSaleScenario';
 import { FastForwardToStartAction } from '../action/FastForwardToStartAction';
-import { Ended, NotEnoughFunds, NotStarted, SoldOut } from '../../src/OrderbookDEXPreSale';
+import { BuyLimitReached, Ended, NotEnoughFunds, NotStarted, SoldOut } from '../../src/OrderbookDEXPreSale';
 import { FastForwardToEndAction } from '../action/FastForwardToEndAction';
 import { BuyPreSaleAction } from '../action/BuyPreSaleAction';
 import { PRE_SALE_TOKENS } from '../utils/tokenomics';
 import { ETHER } from '../utils/eth-units';
+import { MAX_UINT256 } from '@theorderbookdex/abi2ts-lib';
 
 export const buyPreSaleScenarios = [
     // MAIN SCENARIOS
@@ -25,6 +26,18 @@ export const buyPreSaleScenarios = [
             yield {
                 ...properties,
                 exchangeRate,
+            };
+        }
+
+    }).then(function*(properties) {
+        for (const buyLimit of [
+            MAX_UINT256,
+            ETHER * 2n,
+            ETHER * 3n,
+        ]) {
+            yield {
+                ...properties,
+                buyLimit,
             };
         }
 
@@ -53,6 +66,8 @@ export const buyPreSaleScenarios = [
     }).then(function*(properties) {
         yield properties;
 
+        const { exchangeRate, buyLimit } = properties;
+
         for (const value of [
             ETHER * 1n,
             ETHER * 2n,
@@ -60,12 +75,15 @@ export const buyPreSaleScenarios = [
             ETHER / 2n,
             ETHER / 3n,
         ]) {
+            const amountBought = value * exchangeRate / ETHER;
+
             yield {
                 ...properties,
                 setupActions: [
                     ...properties.setupActions,
                     new BuyPreSaleAction({ describer, value }),
                 ],
+                expectedError: amountBought >= buyLimit ? BuyLimitReached : undefined,
             };
         }
 

@@ -57,6 +57,11 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
     uint256 private immutable _vestedAmountPerPeriod;
 
     /**
+     * The maximum amount of tokens an address can buy.
+     */
+    uint256 private immutable _buyLimit;
+
+    /**
      * The total amount sold.
      */
     uint256 private _totalSold;
@@ -74,12 +79,16 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
     /**
      * Constructor.
      *
-     * @param token_        The Orderbook DEX token
-     * @param treasury_     The Orderbook DEX treasury
-     * @param startTime_    the time the pre-sale starts
-     * @param endTime_      the time the pre-sale ends
-     * @param releaseTime_  the time bought tokens are released
-     * @param exchangeRate_ the exchange rate
+     * @param token_                 The Orderbook DEX token
+     * @param treasury_              The Orderbook DEX treasury
+     * @param startTime_             the time the pre-sale starts
+     * @param endTime_               the time the pre-sale ends
+     * @param releaseTime_           the time bought tokens are released
+     * @param exchangeRate_          the exchange rate
+     * @param availableAtRelease_    the amount of tokens available at release per 1e18 tokens bought
+     * @param vestingPeriod_         the duration of each vesting period
+     * @param vestedAmountPerPeriod_ the amount of tokens vested after one period per 1e18 tokens bought
+     * @param buyLimit_              the maximum amount of tokens an address can buy
      */
     constructor(
         IOrderbookDEXToken token_,
@@ -90,13 +99,15 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
         uint256            exchangeRate_,
         uint256            availableAtRelease_,
         uint256            vestingPeriod_,
-        uint256            vestedAmountPerPeriod_
+        uint256            vestedAmountPerPeriod_,
+        uint256            buyLimit_
     ) {
         require(startTime_ < endTime_);
         require(endTime_ < releaseTime_);
         require(exchangeRate_ > 0);
         require(vestingPeriod_ > 0);
         require(vestedAmountPerPeriod_ > 0);
+        require(buyLimit_ > 0);
 
         _token                 = token_;
         _treasury              = treasury_;
@@ -107,6 +118,7 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
         _availableAtRelease    = availableAtRelease_;
         _vestingPeriod         = vestingPeriod_;
         _vestedAmountPerPeriod = vestedAmountPerPeriod_;
+        _buyLimit              = buyLimit_;
     }
 
     function buy() external payable returns (uint256 amountBought, uint256 amountPaid) {
@@ -123,14 +135,24 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
             revert SoldOut();
         }
 
+        uint256 buyLimit_ = _buyLimit - _amountSold[msg.sender];
+        if (buyLimit_ == 0) {
+            revert BuyLimitReached();
+        }
+
         uint256 exchangeRate_ = _exchangeRate;
         amountBought = msg.value * exchangeRate_ / 1 ether;
         if (amountBought == 0) {
             revert NotEnoughFunds();
         }
+
         if (amountBought > amountAvailable) {
             amountBought = amountAvailable;
         }
+        if (amountBought > buyLimit_) {
+            amountBought = buyLimit_;
+        }
+
         amountPaid = amountBought * 1 ether / exchangeRate_;
 
         _amountSold[msg.sender] += amountBought;
@@ -202,6 +224,10 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
 
     function vestedAmountPerPeriod() external view returns (uint256) {
         return _vestedAmountPerPeriod;
+    }
+
+    function buyLimit() external view returns (uint256) {
+        return _buyLimit;
     }
 
     function totalSold() external view returns (uint256) {

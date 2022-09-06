@@ -84,12 +84,18 @@ describe('OrderbookDEXPreSale', () => {
                         expect(await preSale.vestedAmountPerPeriod())
                             .to.be.equal(scenario.vestedAmountPerPeriod);
                     });
+
+                    it('should deploy with the provided buy limit', async (test) => {
+                        const preSale = await test.execute();
+                        expect(await preSale.buyLimit())
+                            .to.be.equal(scenario.buyLimit);
+                    });
                 }
             });
         }
     });
 
-    describe('buy', () => {
+    describe.only('buy', () => {
         for (const scenario of buyPreSaleScenarios) {
             scenario.describe(({ it }) => {
                 if (scenario.expectedError) {
@@ -105,11 +111,12 @@ describe('OrderbookDEXPreSale', () => {
 
                 } else {
                     it('should return amount bought', async (test) => {
-                        const { preSale } = test;
+                        const { preSale, mainAccount } = test;
                         const token = IOrderbookDEXToken.at(await preSale.token());
                         const available = await token.balanceOf(preSale) - await preSale.totalSold();
+                        const buyLimit = await preSale.buyLimit() - await preSale.amountSold(mainAccount);
                         const [ amountBought ] = await test.executeStatic();
-                        const expectedAmountBought = min(scenario.value * scenario.exchangeRate / ETHER, available);
+                        const expectedAmountBought = min(scenario.value * scenario.exchangeRate / ETHER, available, buyLimit);
                         expect(amountBought)
                             .to.be.equal(expectedAmountBought);
                     });

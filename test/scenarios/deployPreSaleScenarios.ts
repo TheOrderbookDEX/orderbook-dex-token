@@ -45,6 +45,10 @@ export const deployPreSaleScenarios: Iterable<DeployPreSaleScenario> = generator
         describer,
         vestedAmountPerPeriod: ETHER / 10n,
     };
+    yield {
+        describer,
+        buyLimit: ETHER,
+    };
 
     // ERROR SCENARIOS
     yield {
@@ -70,6 +74,11 @@ export const deployPreSaleScenarios: Iterable<DeployPreSaleScenario> = generator
     yield {
         describer,
         vestedAmountPerPeriod: 0n,
+        expectedError: Error,
+    };
+    yield {
+        describer,
+        buyLimit: 0n,
         expectedError: Error,
     };
 

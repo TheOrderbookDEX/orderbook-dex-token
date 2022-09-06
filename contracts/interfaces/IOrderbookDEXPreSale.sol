@@ -39,6 +39,11 @@ interface IOrderbookDEXPreSale {
     error NothingToClaim();
 
     /**
+     * Error thrown when no more tokens can be bought because the buy limit has been reached.
+     */
+    error BuyLimitReached();
+
+    /**
      * Buy tokens.
      *
      * Amount of tokens bought is determined by eth sent and tokens available.
@@ -140,4 +145,11 @@ interface IOrderbookDEXPreSale {
      * @return vestedAmountPerPeriod the amount of tokens vested after one period per 1e18 tokens bought
      */
     function vestedAmountPerPeriod() external view returns (uint256 vestedAmountPerPeriod);
+
+    /**
+     * The maximum amount of tokens an address can buy.
+     *
+     * @return buyLimit the maximum amount of tokens an address can buy
+     */
+    function buyLimit() external view returns (uint256 buyLimit);
 }
