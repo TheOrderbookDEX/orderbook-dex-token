@@ -8,6 +8,7 @@ import { BuyPreSaleAction } from '../action/BuyPreSaleAction';
 import { PRE_SALE_TOKENS } from '../utils/tokenomics';
 import { ETHER } from '../utils/eth-units';
 import { MAX_UINT256 } from '@theorderbookdex/abi2ts-lib';
+import { CancelPreSaleAction } from '../action/CancelPreSaleAction';
 
 export const buyPreSaleScenarios = [
     // MAIN SCENARIOS
@@ -84,6 +85,14 @@ export const buyPreSaleScenarios = [
                     new BuyPreSaleAction({ describer, value }),
                 ],
                 expectedError: amountBought >= buyLimit ? BuyLimitReached : undefined,
+            };
+            yield {
+                ...properties,
+                setupActions: [
+                    ...properties.setupActions,
+                    new BuyPreSaleAction({ describer, value }),
+                    new CancelPreSaleAction({ describer }),
+                ],
             };
         }
 

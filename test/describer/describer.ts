@@ -1,6 +1,7 @@
 import { formatValue } from '@theorderbookdex/abi2ts-lib';
 import { ConfigurableDescriber } from '@theorderbookdex/contract-test-helper';
 import { BuyPreSaleAction } from '../action/BuyPreSaleAction';
+import { CancelPreSaleAction } from '../action/CancelPreSaleAction';
 import { ClaimPreSaleAction } from '../action/ClaimPreSaleAction';
 import { FastForwardToEndAction } from '../action/FastForwardToEndAction';
 import { FastForwardToReleaseAction } from '../action/FastForwardToReleaseAction';
@@ -8,6 +9,7 @@ import { FastForwardToStartAction } from '../action/FastForwardToStartAction';
 import { FastForwardToVestingAction } from '../action/FastForwardToVestingAction';
 import { WithdrawPreSaleAction } from '../action/WithdrawPreSaleAction';
 import { BuyPreSaleScenario } from '../scenario/BuyPreSaleScenario';
+import { CancelPreSaleScenario } from '../scenario/CancelPreSaleScenario';
 import { ClaimPreSaleScenario } from '../scenario/ClaimPreSaleScenario';
 import { DeployPreSaleScenario } from '../scenario/DeployPreSaleScenario';
 import { WithdrawPreSaleScenario } from '../scenario/WithdrawPreSaleScenario';
@@ -118,6 +120,18 @@ describer.addDescriber(WithdrawPreSaleScenario, ({
     return description.join(' ');
 });
 
+describer.addDescriber(CancelPreSaleScenario, ({
+    setupActions, ...settings
+}) => {
+    const description = ['cancel'];
+    for (const [ index, action ] of setupActions.entries()) {
+        description.push(index == 0 ? 'after' : 'and');
+        description.push(action.description);
+    }
+    description.push(...describePreSaleSettings(settings));
+    return description.join(' ');
+});
+
 describer.addDescriber(BuyPreSaleAction, ({
     value
 }) => {
@@ -130,6 +144,10 @@ describer.addDescriber(ClaimPreSaleAction, () => {
 
 describer.addDescriber(WithdrawPreSaleAction, () => {
     return `withdraw`;
+});
+
+describer.addDescriber(CancelPreSaleAction, () => {
+    return `cancel`;
 });
 
 describer.addDescriber(FastForwardToStartAction, () => {

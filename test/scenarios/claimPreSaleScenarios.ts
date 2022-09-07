@@ -8,6 +8,7 @@ import { ETHER } from '../utils/eth-units';
 import { FastForwardToReleaseAction } from '../action/FastForwardToReleaseAction';
 import { ClaimPreSaleAction } from '../action/ClaimPreSaleAction';
 import { NothingToClaim, NotReleased } from '../../src/OrderbookDEXPreSale';
+import { CancelPreSaleAction } from '../action/CancelPreSaleAction';
 
 export const claimPreSaleScenarios = [
     // MAIN SCENARIOS
@@ -151,6 +152,18 @@ export const claimPreSaleScenarios = [
         yield {
             describer,
             setupActions: [
+                new FastForwardToReleaseAction({ describer }),
+            ],
+            expectedError: NothingToClaim,
+        };
+        yield {
+            describer,
+            availableAtRelease: ETHER / 10n,
+            vestedAmountPerPeriod: ETHER / 10n,
+            setupActions: [
+                new FastForwardToStartAction({ describer }),
+                new BuyPreSaleAction({ describer, value: ETHER * 1n }),
+                new CancelPreSaleAction({ describer }),
                 new FastForwardToReleaseAction({ describer }),
             ],
             expectedError: NothingToClaim,

@@ -4,6 +4,7 @@ import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { IOrderbookDEXToken } from '../src/interfaces/IOrderbookDEXToken';
 import { buyPreSaleScenarios } from './scenarios/buyPreSaleScenarios';
+import { cancelPreSaleScenarios } from './scenarios/cancelPreSaleScenarios';
 import { claimPreSaleScenarios } from './scenarios/claimPreSaleScenarios';
 import { deployPreSaleScenarios } from './scenarios/deployPreSaleScenarios';
 import { withdrawPreSaleScenarios } from './scenarios/withdrawPreSaleScenarios';
@@ -242,7 +243,93 @@ describe('OrderbookDEXPreSale', () => {
     });
 
     describe('cancel', () => {
-        // TODO test cancel pre-sale
+        for (const scenario of cancelPreSaleScenarios) {
+            scenario.describe(({ it }) => {
+                if (scenario.expectedError) {
+                    it('should fail', async (test) => {
+                        await expect(test.execute())
+                            .to.be.rejected;
+                    });
+
+                    it(`should fail with ${describeError(scenario.expectedError)}`, async (test) => {
+                        await expect(test.executeStatic())
+                            .to.be.rejectedWith(scenario.expectedError as typeof Error);
+                    });
+
+                } else {
+                    it('should return amount of tokens returned', async (test) => {
+                        const { preSale, mainAccount } = test;
+                        const expectedAmountReturned = await preSale.amountSold(mainAccount);
+                        const [ amountReturned ] = await test.executeStatic();
+                        expect(amountReturned)
+                            .to.be.equal(expectedAmountReturned);
+                    });
+
+                    it('should return amount refunded', async (test) => {
+                        const { preSale, mainAccount } = test;
+                        const expectedAmountRefunded = await preSale.amountPaid(mainAccount);
+                        const [ , amountRefunded ] = await test.executeStatic();
+                        expect(amountRefunded)
+                            .to.be.equal(expectedAmountRefunded);
+                    });
+
+                    it('should decrease eth balance by amount refunded', async (test) => {
+                        const { preSale } = test;
+                        const [ , amountRefunded ] = await test.executeStatic();
+                        const expectedBalance = await getBalance(preSale.address) - amountRefunded;
+                        await test.execute();
+                        expect(await getBalance(preSale.address))
+                            .to.be.equal(expectedBalance);
+                    });
+
+                    it('should refund buyer', async (test) => {
+                        const { mainAccount } = test;
+                        const [ , amountRefunded ] = await test.executeStatic();
+                        const prevBalance = await getBalance(mainAccount);
+                        const tx = await test.execute();
+                        const txCost = transactionCost(tx);
+                        expect(await getBalance(mainAccount))
+                            .to.be.equal(prevBalance - txCost + amountRefunded);
+                    });
+
+                    it('should decrease total amount sold', async (test) => {
+                        const { preSale } = test;
+                        const [ amountReturned ] = await test.executeStatic();
+                        const expectedTotalSold = await preSale.totalSold() - amountReturned;
+                        await test.execute();
+                        expect(await preSale.totalSold())
+                            .to.be.equal(expectedTotalSold);
+                    });
+
+                    it('should decrease amount sold for buyer', async (test) => {
+                        const { preSale, mainAccount } = test;
+                        const [ amountReturned ] = await test.executeStatic();
+                        const expectedAmountSold = await preSale.amountSold(mainAccount) - amountReturned;
+                        await test.execute();
+                        expect(await preSale.amountSold(mainAccount))
+                            .to.be.equal(expectedAmountSold);
+                    });
+
+                    it('should decrease total amount paid', async (test) => {
+                        const { preSale } = test;
+                        const [ , amountRefunded ] = await test.executeStatic();
+                        const expectedTotalPaid = await preSale.totalPaid() - amountRefunded;
+                        await test.execute();
+                        expect(await preSale.totalPaid())
+                            .to.be.equal(expectedTotalPaid);
+                    });
+
+                    it('should decrease amount paid for buyer', async (test) => {
+                        const { preSale, mainAccount } = test;
+                        const [ , amountRefunded ] = await test.executeStatic();
+                        const expectedAmountPaid = await preSale.amountPaid(mainAccount) - amountRefunded;
+                        await test.execute();
+                        expect(await preSale.amountPaid(mainAccount))
+                            .to.be.equal(expectedAmountPaid);
+                    });
+                }
+            });
+        }
     });
 
     describe('withdraw', () => {
