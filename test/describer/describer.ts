@@ -18,7 +18,7 @@ import { formatExchangeRate, formatTimeOffset, formatTimePeriod } from '../utils
 export const describer = new ConfigurableDescriber<void>();
 
 function describePreSaleSettings({
-    token, treasury, startTimeOffset, endTimeOffset, releaseTimeOffset, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit
+    token, treasury, startTimeOffset, endTimeOffset, releaseTimeOffset, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit, successThreshold
 }: {
     token?: string,
     treasury?: string,
@@ -29,7 +29,8 @@ function describePreSaleSettings({
     availableAtRelease: bigint,
     vestingPeriod: bigint,
     vestedAmountPerPeriod: bigint,
-    buyLimit: bigint
+    buyLimit: bigint,
+    successThreshold: bigint;
 }): string[] {
     const description: string[] = [];
     if (token && token != DeployPreSaleScenario.DEFAULT_TOKEN) {
@@ -71,6 +72,10 @@ function describePreSaleSettings({
     if (buyLimit != DeployPreSaleScenario.DEFAULT_BUY_LIMIT) {
         description.push(description.length ? 'and' : 'with');
         description.push(`buyLimit = ${formatValue(buyLimit)}`);
+    }
+    if (successThreshold != DeployPreSaleScenario.DEFAULT_SUCCESS_THRESHOLD) {
+        description.push(description.length ? 'and' : 'with');
+        description.push(`successThreshold = ${formatValue(successThreshold)}`);
     }
     return description;
 }

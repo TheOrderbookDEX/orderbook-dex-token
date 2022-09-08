@@ -74,6 +74,22 @@ export const cancelPreSaleScenarios = [
         yield new CancelPreSaleScenario(properties);
     }),
 
+    // PRE SALE NOT SUCCESSFUL SCENARIOS
+    ...generatorChain(function*() {
+        yield {
+            describer,
+            successThreshold: ETHER * 1n + 1n,
+            setupActions: [
+                new FastForwardToStartAction({ describer }),
+                new BuyPreSaleAction({ describer, value: ETHER * 1n }),
+                new FastForwardToEndAction({ describer }),
+            ],
+        };
+
+    }).then(function*(properties) {
+        yield new CancelPreSaleScenario(properties);
+    }),
+
     // ERROR SCENARIOS
     ...generatorChain(function*() {
         yield {

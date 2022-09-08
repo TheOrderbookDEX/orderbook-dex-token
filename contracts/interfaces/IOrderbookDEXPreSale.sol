@@ -64,6 +64,11 @@ interface IOrderbookDEXPreSale {
     error NothingToCancel();
 
     /**
+     * Error thrown when the pre-sale wasn't successful.
+     */
+    error NotSuccessful();
+
+    /**
      * Buy tokens.
      *
      * Amount of tokens bought is determined by eth sent and tokens available.
@@ -210,4 +215,13 @@ interface IOrderbookDEXPreSale {
      * @return buyLimit the maximum amount of tokens an address can buy
      */
     function buyLimit() external view returns (uint256 buyLimit);
+
+    /**
+     * The amount of eth collected to consider the pre-sale successful.
+     *
+     * If the pre-sale ends below this target, buyers won't get the tokens but will be able to cancel to get refunded.
+     *
+     * @return successThreshold the amount of eth collected to consider the pre-sale successful
+     */
+    function successThreshold() external view returns (uint256 successThreshold);
 }

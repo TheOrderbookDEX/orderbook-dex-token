@@ -62,6 +62,13 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
     uint256 private immutable _buyLimit;
 
     /**
+     * The amount of eth collected to consider the pre-sale successful.
+     *
+     * If the pre-sale ends below this target, buyers won't get the tokens but will be able to cancel to get refunded.
+     */
+    uint256 private immutable _successThreshold;
+
+    /**
      * The total amount sold.
      */
     uint256 private _totalSold;
@@ -110,7 +117,8 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
         uint256            availableAtRelease_,
         uint256            vestingPeriod_,
         uint256            vestedAmountPerPeriod_,
-        uint256            buyLimit_
+        uint256            buyLimit_,
+        uint256            successThreshold_
     ) {
         require(startTime_ < endTime_);
         require(endTime_ < releaseTime_);
@@ -129,6 +137,7 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
         _vestingPeriod         = vestingPeriod_;
         _vestedAmountPerPeriod = vestedAmountPerPeriod_;
         _buyLimit              = buyLimit_;
+        _successThreshold      = successThreshold_;
     }
 
     function buy() external payable returns (uint256 amountBought, uint256 amountPaid_) {
@@ -182,6 +191,10 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
             revert NotReleased();
         }
 
+        if (_totalPaid < _successThreshold) {
+            revert NotSuccessful();
+        }
+
         uint256 availableRatio = _availableAtRelease
             + (currentTime - _releaseTime) / _vestingPeriod * _vestedAmountPerPeriod;
         uint256 amountSold_ = _amountSold[msg.sender];
@@ -205,7 +218,9 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
     function cancel() external returns (uint256 amountReturned, uint256 amountRefunded) {
         uint256 currentTime = block.timestamp;
         if (currentTime >= _endTime) {
-            revert Ended();
+            if (_totalPaid >= _successThreshold) {
+                revert Ended();
+            }
         }
 
         amountReturned = _amountSold[msg.sender];
@@ -232,6 +247,10 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
         uint256 currentTime = block.timestamp;
         if (currentTime < _endTime) {
             revert NotEnded();
+        }
+
+        if (_totalPaid < _successThreshold) {
+            revert NotSuccessful();
         }
 
         uint256 amountWithdrawn = address(this).balance;
@@ -281,6 +300,10 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
 
     function buyLimit() external view returns (uint256) {
         return _buyLimit;
+    }
+
+    function successThreshold() external view returns (uint256) {
+        return _successThreshold;
     }
 
     function totalSold() external view returns (uint256) {

@@ -21,6 +21,7 @@ export interface DeployPreSaleScenarioProperties extends TestScenarioProperties<
     readonly vestingPeriod?: bigint;
     readonly vestedAmountPerPeriod?: bigint;
     readonly buyLimit?: bigint;
+    readonly successThreshold?: bigint;
 }
 
 export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, OrderbookDEXPreSale, string> {
@@ -34,6 +35,7 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     static readonly DEFAULT_VESTING_PERIOD = ONE_HOUR;
     static readonly DEFAULT_VESTED_AMOUNT_PER_PERIOD = parseValue(1);
     static readonly DEFAULT_BUY_LIMIT = MAX_UINT256;
+    static readonly DEFAULT_SUCCESS_THRESHOLD = 0n;
 
     readonly token: string;
     readonly treasury: string;
@@ -45,6 +47,7 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     readonly vestingPeriod: bigint;
     readonly vestedAmountPerPeriod: bigint;
     readonly buyLimit: bigint;
+    readonly successThreshold: bigint;
 
     constructor({
         token                 = DeployPreSaleScenario.DEFAULT_TOKEN,
@@ -57,6 +60,7 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
         vestingPeriod         = DeployPreSaleScenario.DEFAULT_VESTING_PERIOD,
         vestedAmountPerPeriod = DeployPreSaleScenario.DEFAULT_VESTED_AMOUNT_PER_PERIOD,
         buyLimit              = DeployPreSaleScenario.DEFAULT_BUY_LIMIT,
+        successThreshold      = DeployPreSaleScenario.DEFAULT_SUCCESS_THRESHOLD,
         ...rest
     }: DeployPreSaleScenarioProperties) {
         super(rest);
@@ -70,6 +74,7 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
         this.vestingPeriod         = vestingPeriod;
         this.vestedAmountPerPeriod = vestedAmountPerPeriod;
         this.buyLimit              = buyLimit;
+        this.successThreshold      = successThreshold;
     }
 
     addContext(addContext: AddContextFunction): void {
@@ -83,6 +88,7 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
         addContext('vesting period', formatTimePeriod(this.vestingPeriod));
         addContext('vested amount per period', formatValue(this.vestedAmountPerPeriod));
         addContext('buy limit', formatValue(this.buyLimit));
+        addContext('success threshold', formatValue(this.successThreshold));
         super.addContext(addContext);
     }
 
@@ -99,12 +105,12 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     }
 
     async execute({ startTime, endTime, releaseTime }: DeployPreSaleContext) {
-        const { token, treasury, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit } = this;
-        return await OrderbookDEXPreSale.deploy(token, treasury, startTime, endTime, releaseTime, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit);
+        const { token, treasury, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit, successThreshold } = this;
+        return await OrderbookDEXPreSale.deploy(token, treasury, startTime, endTime, releaseTime, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit, successThreshold);
     }
 
     async executeStatic({ startTime, endTime, releaseTime }: DeployPreSaleContext) {
-        const { token, treasury, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit } = this;
-        return await OrderbookDEXPreSale.callStatic.deploy(token, treasury, startTime, endTime, releaseTime, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit);
+        const { token, treasury, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit, successThreshold } = this;
+        return await OrderbookDEXPreSale.callStatic.deploy(token, treasury, startTime, endTime, releaseTime, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit, successThreshold);
     }
 }

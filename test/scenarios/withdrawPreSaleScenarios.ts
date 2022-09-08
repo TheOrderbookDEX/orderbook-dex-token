@@ -1,5 +1,5 @@
 import { generatorChain } from '@theorderbookdex/contract-test-helper';
-import { NotEnded, NothingToWithdraw, Unauthorized } from '../../src/OrderbookDEXPreSale';
+import { NotEnded, NothingToWithdraw, NotSuccessful, Unauthorized } from '../../src/OrderbookDEXPreSale';
 import { BuyPreSaleAction } from '../action/BuyPreSaleAction';
 import { FastForwardToEndAction } from '../action/FastForwardToEndAction';
 import { FastForwardToStartAction } from '../action/FastForwardToStartAction';
@@ -70,6 +70,16 @@ export const withdrawPreSaleScenarios = [
                 new BuyPreSaleAction({ describer, value: ETHER }),
             ],
             expectedError: NotEnded,
+        };
+        yield {
+            describer,
+            successThreshold: ETHER * 1n + 1n,
+            setupActions: [
+                new FastForwardToStartAction({ describer }),
+                new BuyPreSaleAction({ describer, value: ETHER }),
+                new FastForwardToEndAction({ describer }),
+            ],
+            expectedError: NotSuccessful,
         };
         yield {
             describer,

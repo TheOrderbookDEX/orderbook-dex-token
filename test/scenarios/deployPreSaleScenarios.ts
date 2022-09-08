@@ -49,6 +49,10 @@ export const deployPreSaleScenarios: Iterable<DeployPreSaleScenario> = generator
         describer,
         buyLimit: ETHER,
     };
+    yield {
+        describer,
+        successThreshold: ETHER,
+    };
 
     // ERROR SCENARIOS
     yield {

@@ -92,6 +92,12 @@ describe('OrderbookDEXPreSale', () => {
                         expect(await preSale.buyLimit())
                             .to.be.equal(scenario.buyLimit);
                     });
+
+                    it('should deploy with the provided success threshold', async (test) => {
+                        const preSale = await test.execute();
+                        expect(await preSale.successThreshold())
+                            .to.be.equal(scenario.successThreshold);
+                    });
                 }
             });
         }
