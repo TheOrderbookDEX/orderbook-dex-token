@@ -32,8 +32,8 @@
 		},
 		{
 			"label": "Type Check",
-            "type": "typescript",
-            "tsconfig": "tsconfig.json",
+			"type": "npm",
+			"script": "typecheck",
             "problemMatcher": "$tsc",
         }
 	]
