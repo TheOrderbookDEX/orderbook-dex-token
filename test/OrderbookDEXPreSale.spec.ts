@@ -16,6 +16,8 @@ chai.use(chaiAsPromised);
 
 DefaultOverrides.gasLimit = 5000000;
 
+// TODO test buy using early exchange rate
+
 describe('OrderbookDEXPreSale', () => {
     describe('deploy', () => {
         for (const scenario of deployPreSaleScenarios) {
@@ -97,6 +99,24 @@ describe('OrderbookDEXPreSale', () => {
                         const preSale = await test.execute();
                         expect(await preSale.successThreshold())
                             .to.be.equal(scenario.successThreshold);
+                    });
+
+                    it('should deploy with the provided early exchange rate', async (test) => {
+                        const preSale = await test.execute();
+                        expect(await preSale.earlyExchangeRate())
+                            .to.be.equal(scenario.earlyExchangeRate);
+                    });
+
+                    it('should deploy with the provided early end time', async (test) => {
+                        const preSale = await test.execute();
+                        expect(await preSale.earlyEndTime())
+                            .to.be.equal(test.earlyEndTime);
+                    });
+
+                    it('should deploy with the provided early limit', async (test) => {
+                        const preSale = await test.execute();
+                        expect(await preSale.earlyLimit())
+                            .to.be.equal(scenario.earlyLimit);
                     });
                 }
             });

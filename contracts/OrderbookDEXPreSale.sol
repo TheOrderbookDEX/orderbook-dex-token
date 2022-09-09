@@ -5,8 +5,6 @@ pragma solidity 0.8.17;
 import { IOrderbookDEXToken } from "./interfaces/IOrderbookDEXToken.sol";
 import { IOrderbookDEXPreSale } from "./interfaces/IOrderbookDEXPreSale.sol";
 
-// TODO pre-sale stages
-
 /**
  * The Orderbook DEX Token pre-sale.
  */
@@ -69,6 +67,21 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
     uint256 private immutable _successThreshold;
 
     /**
+     * The exchange rate as amount of tokens received per 1 ether during the early stage.
+     */
+    uint256 private immutable _earlyExchangeRate;
+
+    /**
+     * The time the early stage ends.
+     */
+    uint256 private immutable _earlyEndTime;
+
+    /**
+     * The maximum amount of tokens that can be sold during the early stage.
+     */
+    uint256 private immutable _earlyLimit;
+
+    /**
      * The total amount sold.
      */
     uint256 private _totalSold;
@@ -106,6 +119,10 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
      * @param vestingPeriod_         the duration of each vesting period
      * @param vestedAmountPerPeriod_ the amount of tokens vested after one period per 1e18 tokens bought
      * @param buyLimit_              the maximum amount of tokens an address can buy
+     * @param successThreshold_      the amount of eth collected to consider the pre-sale successful
+     * @param earlyExchangeRate_     the exchange rate as amount of tokens received per 1 ether during the early stage
+     * @param earlyEndTime_          the time the early stage ends
+     * @param earlyLimit_            the maximum amount of tokens that can be sold during the early stage
      */
     constructor(
         IOrderbookDEXToken token_,
@@ -118,11 +135,16 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
         uint256            vestingPeriod_,
         uint256            vestedAmountPerPeriod_,
         uint256            buyLimit_,
-        uint256            successThreshold_
+        uint256            successThreshold_,
+        uint256            earlyExchangeRate_,
+        uint256            earlyEndTime_,
+        uint256            earlyLimit_
     ) {
-        require(startTime_ < endTime_);
+        require(startTime_ < earlyEndTime_);
+        require(earlyEndTime_ < endTime_);
         require(endTime_ < releaseTime_);
         require(exchangeRate_ > 0);
+        require(earlyExchangeRate_ > 0);
         require(vestingPeriod_ > 0);
         require(vestedAmountPerPeriod_ > 0);
         require(buyLimit_ > 0);
@@ -138,6 +160,9 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
         _vestedAmountPerPeriod = vestedAmountPerPeriod_;
         _buyLimit              = buyLimit_;
         _successThreshold      = successThreshold_;
+        _earlyExchangeRate     = earlyExchangeRate_;
+        _earlyEndTime          = earlyEndTime_;
+        _earlyLimit            = earlyLimit_;
     }
 
     function buy() external payable returns (uint256 amountBought, uint256 amountPaid_) {
@@ -149,30 +174,60 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
             revert Ended();
         }
 
-        uint256 amountAvailable = _token.balanceOf(address(this)) - _totalSold;
+        uint256 totalSold_ = _totalSold;
+
+        uint256 amountAvailable = _token.balanceOf(address(this)) - totalSold_;
         if (amountAvailable == 0) {
             revert SoldOut();
         }
 
-        uint256 buyLimit_ = _buyLimit - _amountSold[msg.sender];
-        if (buyLimit_ == 0) {
-            revert BuyLimitReached();
+        {
+            uint256 buyLimit_ = _buyLimit - _amountSold[msg.sender];
+            if (buyLimit_ == 0) {
+                revert BuyLimitReached();
+            }
+            if (amountAvailable > buyLimit_) {
+                amountAvailable = buyLimit_;
+            }
         }
 
-        uint256 exchangeRate_ = _exchangeRate;
-        amountBought = msg.value * exchangeRate_ / 1 ether;
-        if (amountBought == 0) {
-            revert NotEnoughFunds();
-        }
+        uint256 earlyLimit_ = _earlyLimit;
 
-        if (amountBought > amountAvailable) {
-            amountBought = amountAvailable;
-        }
-        if (amountBought > buyLimit_) {
-            amountBought = buyLimit_;
-        }
+        if (totalSold_ < earlyLimit_ && currentTime < _earlyEndTime) {
+            uint256 earlyAvailable = earlyLimit_ - totalSold_;
+            if (earlyAvailable > amountAvailable) {
+                earlyAvailable = amountAvailable;
+            }
 
-        amountPaid_ = amountBought * 1 ether / exchangeRate_;
+            (uint256 bought, uint256 paid) =
+                calculateBoughtTokens(msg.value, _earlyExchangeRate, earlyAvailable);
+
+            if (bought == 0) {
+                revert NotEnoughFunds();
+            }
+
+            amountBought = bought;
+            amountPaid_ = paid;
+
+            if (msg.value > paid && amountAvailable > earlyAvailable) {
+                (uint256 bought2, uint256 paid2) =
+                    calculateBoughtTokens(msg.value - paid, _exchangeRate, amountAvailable - bought);
+
+                amountBought += bought2;
+                amountPaid_ += paid2;
+            }
+
+        } else {
+            (uint256 bought, uint256 paid) =
+                calculateBoughtTokens(msg.value, _exchangeRate, amountAvailable);
+
+            if (bought == 0) {
+                revert NotEnoughFunds();
+            }
+
+            amountBought = bought;
+            amountPaid_ = paid;
+        }
 
         _amountSold[msg.sender] += amountBought;
         _totalSold += amountBought;
@@ -306,6 +361,18 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
         return _successThreshold;
     }
 
+    function earlyExchangeRate() external view returns (uint256) {
+        return _earlyExchangeRate;
+    }
+
+    function earlyEndTime() external view returns (uint256) {
+        return _earlyEndTime;
+    }
+
+    function earlyLimit() external view returns (uint256) {
+        return _earlyLimit;
+    }
+
     function totalSold() external view returns (uint256) {
         return _totalSold;
     }
@@ -324,5 +391,17 @@ contract OrderbookDEXPreSale is IOrderbookDEXPreSale {
 
     function amountClaimed(address account) external view returns (uint256) {
         return _amountClaimed[account];
+    }
+
+    function calculateBoughtTokens(uint256 value, uint256 rate, uint256 limit) private pure
+        returns (uint256 bought, uint256 paid)
+    {
+            bought = value * rate / 1 ether;
+            if (bought != 0) {
+                if (bought > limit) {
+                    bought = limit;
+                }
+                paid = bought * 1 ether / rate;
+            }
     }
 }

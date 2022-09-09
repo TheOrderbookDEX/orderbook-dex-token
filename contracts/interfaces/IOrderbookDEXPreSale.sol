@@ -224,4 +224,25 @@ interface IOrderbookDEXPreSale {
      * @return successThreshold the amount of eth collected to consider the pre-sale successful
      */
     function successThreshold() external view returns (uint256 successThreshold);
+
+    /**
+     * The exchange rate as amount of tokens received per 1 ether during the early stage.
+     *
+     * @return earlyExchangeRate the exchange rate as amount of tokens received per 1 ether during the early stage
+     */
+    function earlyExchangeRate() external view returns (uint256 earlyExchangeRate);
+
+    /**
+     * The time the early stage ends.
+     *
+     * @return earlyEndTime the time the early stage ends
+     */
+    function earlyEndTime() external view returns (uint256 earlyEndTime);
+
+    /**
+     * The maximum amount of tokens that can be sold during the early stage.
+     *
+     * @return earlyLimit the maximum amount of tokens that can be sold during the early stage
+     */
+    function earlyLimit() external view returns (uint256 earlyLimit);
 }

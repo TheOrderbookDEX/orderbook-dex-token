@@ -18,7 +18,9 @@ import { formatExchangeRate, formatTimeOffset, formatTimePeriod } from '../utils
 export const describer = new ConfigurableDescriber<void>();
 
 function describePreSaleSettings({
-    token, treasury, startTimeOffset, endTimeOffset, releaseTimeOffset, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit, successThreshold
+    token, treasury, startTimeOffset, endTimeOffset, releaseTimeOffset, exchangeRate,
+    availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit, successThreshold,
+    earlyExchangeRate, earlyEndTimeOffset, earlyLimit
 }: {
     token?: string,
     treasury?: string,
@@ -31,6 +33,9 @@ function describePreSaleSettings({
     vestedAmountPerPeriod: bigint,
     buyLimit: bigint,
     successThreshold: bigint;
+    earlyExchangeRate: bigint;
+    earlyEndTimeOffset: bigint;
+    earlyLimit: bigint;
 }): string[] {
     const description: string[] = [];
     if (token && token != DeployPreSaleScenario.DEFAULT_TOKEN) {
@@ -47,7 +52,7 @@ function describePreSaleSettings({
     }
     if (endTimeOffset != DeployPreSaleScenario.DEFAULT_END_TIME_OFFSET) {
         description.push(description.length ? 'and' : 'with');
-        description.push(`endTime = ${formatTimeOffset(endTimeOffset, 'startTime')}`);
+        description.push(`endTime = ${formatTimeOffset(endTimeOffset, 'earlyEndTime')}`);
     }
     if (releaseTimeOffset != DeployPreSaleScenario.DEFAULT_RELEASE_TIME_OFFSET) {
         description.push(description.length ? 'and' : 'with');
@@ -76,6 +81,18 @@ function describePreSaleSettings({
     if (successThreshold != DeployPreSaleScenario.DEFAULT_SUCCESS_THRESHOLD) {
         description.push(description.length ? 'and' : 'with');
         description.push(`successThreshold = ${formatValue(successThreshold)}`);
+    }
+    if (earlyExchangeRate != DeployPreSaleScenario.DEFAULT_EXCHANGE_RATE) {
+        description.push(description.length ? 'and' : 'with');
+        description.push(`earlyExchangeRate = ${formatValue(earlyExchangeRate)}`);
+    }
+    if (earlyEndTimeOffset != DeployPreSaleScenario.DEFAULT_EARLY_END_TIME_OFFSET) {
+        description.push(description.length ? 'and' : 'with');
+        description.push(`earlyEndTime = ${formatTimeOffset(earlyEndTimeOffset, 'startTime')}`);
+    }
+    if (earlyLimit != DeployPreSaleScenario.DEFAULT_EARLY_LIMIT) {
+        description.push(description.length ? 'and' : 'with');
+        description.push(`earlyLimit = ${formatValue(earlyLimit)}`);
     }
     return description;
 }

@@ -24,6 +24,9 @@ export interface PreSaleScenarioProperties<TestContext extends PreSaleContext>
     readonly vestedAmountPerPeriod?: bigint;
     readonly buyLimit?: bigint;
     readonly successThreshold?: bigint;
+    readonly earlyExchangeRate?: bigint;
+    readonly earlyEndTimeOffset?: bigint;
+    readonly earlyLimit?: bigint;
 }
 
 export abstract class PreSaleScenario<TestContext extends PreSaleContext, ExecuteResult, ExecuteStaticResult>
@@ -39,6 +42,9 @@ export abstract class PreSaleScenario<TestContext extends PreSaleContext, Execut
     readonly vestedAmountPerPeriod: bigint;
     readonly buyLimit: bigint;
     readonly successThreshold: bigint;
+    readonly earlyExchangeRate: bigint;
+    readonly earlyEndTimeOffset: bigint;
+    readonly earlyLimit: bigint;
 
     constructor({
         treasury,
@@ -51,6 +57,9 @@ export abstract class PreSaleScenario<TestContext extends PreSaleContext, Execut
         vestedAmountPerPeriod = DeployPreSaleScenario.DEFAULT_VESTED_AMOUNT_PER_PERIOD,
         buyLimit              = DeployPreSaleScenario.DEFAULT_BUY_LIMIT,
         successThreshold      = DeployPreSaleScenario.DEFAULT_SUCCESS_THRESHOLD,
+        earlyExchangeRate     = DeployPreSaleScenario.DEFAULT_EARLY_EXCHANGE_RATE,
+        earlyEndTimeOffset    = DeployPreSaleScenario.DEFAULT_EARLY_END_TIME_OFFSET,
+        earlyLimit            = DeployPreSaleScenario.DEFAULT_EARLY_LIMIT,
         ...rest
     }: PreSaleScenarioProperties<TestContext>) {
         super(rest);
@@ -64,6 +73,9 @@ export abstract class PreSaleScenario<TestContext extends PreSaleContext, Execut
         this.vestedAmountPerPeriod = vestedAmountPerPeriod;
         this.buyLimit              = buyLimit;
         this.successThreshold      = successThreshold;
+        this.earlyExchangeRate     = earlyExchangeRate;
+        this.earlyEndTimeOffset    = earlyEndTimeOffset;
+        this.earlyLimit            = earlyLimit;
     }
 
     addContext(addContext: AddContextFunction): void {
@@ -71,7 +83,7 @@ export abstract class PreSaleScenario<TestContext extends PreSaleContext, Execut
             addContext('treasury address', this.treasury);
         }
         addContext('start time', formatTimeOffset(this.startTimeOffset));
-        addContext('end time', formatTimeOffset(this.endTimeOffset, 'startTime'));
+        addContext('end time', formatTimeOffset(this.endTimeOffset, 'earlyEndTime'));
         addContext('release time', formatTimeOffset(this.releaseTimeOffset, 'endTime'));
         addContext('exchange rate', formatExchangeRate(this.exchangeRate));
         addContext('available at release', formatValue(this.availableAtRelease));
@@ -79,21 +91,32 @@ export abstract class PreSaleScenario<TestContext extends PreSaleContext, Execut
         addContext('vested amount per period', formatValue(this.vestedAmountPerPeriod));
         addContext('buy limit', formatValue(this.buyLimit));
         addContext('success threshold', formatValue(this.successThreshold));
+        addContext('early exchange rate', formatValue(this.earlyExchangeRate));
+        addContext('early end time', formatTimeOffset(this.earlyEndTimeOffset, 'startTime'));
+        addContext('early limit', formatValue(this.earlyLimit));
         super.addContext(addContext);
     }
 
     protected async _setup(): Promise<PreSaleContext> {
         const ctx = await super._setup();
         const startTime = now() + this.startTimeOffset;
-        const endTime = startTime + this.endTimeOffset;
+        const earlyEndTime = startTime + this.earlyEndTimeOffset;
+        const endTime = earlyEndTime + this.endTimeOffset;
         const releaseTime = endTime + this.releaseTimeOffset;
         const treasury = this.treasury ?? ctx.mainAccount;
         const seed = '0x1000000000000000000000000000000000000002';
         const publicSale = '0x1000000000000000000000000000000000000003';
         const preSaleAddress = await predictContractAddress(1);
         const token = await OrderbookDEXToken.deploy(treasury, seed, preSaleAddress, publicSale);
-        const { exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit, successThreshold } = this;
-        const preSale = await OrderbookDEXPreSale.deploy(token, treasury, startTime, endTime, releaseTime, exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit, successThreshold);
+        const {
+            exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit,
+            successThreshold, earlyExchangeRate, earlyLimit
+        } = this;
+        const preSale = await OrderbookDEXPreSale.deploy(
+            token, treasury, startTime, endTime, releaseTime, exchangeRate, availableAtRelease,
+            vestingPeriod, vestedAmountPerPeriod, buyLimit, successThreshold, earlyExchangeRate,
+            earlyEndTime, earlyLimit
+        );
         return { ...ctx, token, preSale };
     }
 }

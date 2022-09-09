@@ -21,7 +21,7 @@ export async function clean() {
 export function compileContracts() {
     return src('contracts/**/*.sol')
         .pipe(through2.obj(function(file: File, _, callback) {
-            file.contents = Buffer.from(JSON.stringify(solc(file.base, file.relative, file.contents as Buffer, { optimizer: { enabled: true } }), null, 2));
+            file.contents = Buffer.from(JSON.stringify(solc(file.base, file.relative, file.contents as Buffer, { optimizer: { enabled: true }, viaIR: true }), null, 2));
             log(`>>> Compiled contracts/${file.relative}`);
             file.extname = '.json';
             callback(null, file);
