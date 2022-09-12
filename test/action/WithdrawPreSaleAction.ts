@@ -1,4 +1,5 @@
 import { PreSaleContext } from '../scenario/PreSaleScenario';
+import { PreSaleState } from '../state/PreSaleState';
 import { PreSaleAction, PreSaleActionProperties } from './PreSaleAction';
 
 export type WithdrawPreSaleActionProperties = PreSaleActionProperties;
@@ -9,6 +10,9 @@ export class WithdrawPreSaleAction extends PreSaleAction {
     }
 
     apply<T>(state: T) {
+        if (state instanceof PreSaleState) {
+            return state.withdraw() as T;
+        }
         return state;
     }
 }

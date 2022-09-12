@@ -1,4 +1,4 @@
-import { generatorChain } from '@theorderbookdex/contract-test-helper';
+import { Account, generatorChain } from '@theorderbookdex/contract-test-helper';
 import { describer } from '../describer/describer';
 import { BuyPreSaleScenario } from '../scenario/BuyPreSaleScenario';
 import { FastForwardToStartAction } from '../action/FastForwardToStartAction';
@@ -9,6 +9,7 @@ import { PRE_SALE_TOKENS } from '../utils/tokenomics';
 import { ETHER } from '../utils/eth-units';
 import { MAX_UINT256 } from '@theorderbookdex/abi2ts-lib';
 import { CancelPreSaleAction } from '../action/CancelPreSaleAction';
+import { FastForwardToEarlyEndAction } from '../action/FastForwardToEarlyEndAction';
 
 export const buyPreSaleScenarios = [
     // MAIN SCENARIOS
@@ -24,9 +25,12 @@ export const buyPreSaleScenarios = [
             ETHER / 10n,
             ETHER / 3n,
         ]) {
+            const earlyExchangeRate = exchangeRate * 2n;
+
             yield {
                 ...properties,
                 exchangeRate,
+                earlyExchangeRate,
             };
         }
 
@@ -39,6 +43,17 @@ export const buyPreSaleScenarios = [
             yield {
                 ...properties,
                 buyLimit,
+            };
+        }
+
+    }).then(function*(properties) {
+        for (const earlyLimit of [
+            0n,
+            properties.earlyExchangeRate * 2n,
+        ]) {
+            yield {
+                ...properties,
+                earlyLimit,
             };
         }
 
@@ -67,8 +82,6 @@ export const buyPreSaleScenarios = [
     }).then(function*(properties) {
         yield properties;
 
-        const { exchangeRate, buyLimit } = properties;
-
         for (const value of [
             ETHER * 1n,
             ETHER * 2n,
@@ -76,15 +89,12 @@ export const buyPreSaleScenarios = [
             ETHER / 2n,
             ETHER / 3n,
         ]) {
-            const amountBought = value * exchangeRate / ETHER;
-
             yield {
                 ...properties,
                 setupActions: [
                     ...properties.setupActions,
                     new BuyPreSaleAction({ describer, value }),
                 ],
-                expectedError: amountBought >= buyLimit ? BuyLimitReached : undefined,
             };
             yield {
                 ...properties,
@@ -93,6 +103,37 @@ export const buyPreSaleScenarios = [
                     new BuyPreSaleAction({ describer, value }),
                     new CancelPreSaleAction({ describer }),
                 ],
+            };
+            yield {
+                ...properties,
+                setupActions: [
+                    ...properties.setupActions,
+                    new BuyPreSaleAction({ describer, value, account: Account.SECOND }),
+                ],
+            };
+        }
+
+    }).then(function*(properties) {
+        yield properties;
+
+        if (properties.earlyLimit) {
+            yield {
+                ...properties,
+                setupActions: [
+                    ...properties.setupActions,
+                    new FastForwardToEarlyEndAction({ describer }),
+                ],
+            };
+        }
+
+    }).then(function*(properties) {
+        if (new BuyPreSaleScenario(properties).expectedAmountBought) {
+            yield properties;
+
+        } else {
+            yield {
+                ...properties,
+                expectedError: BuyLimitReached,
             };
         }
 

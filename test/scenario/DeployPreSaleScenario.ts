@@ -40,7 +40,7 @@ export class DeployPreSaleScenario extends TestScenario<DeployPreSaleContext, Or
     static readonly DEFAULT_VESTED_AMOUNT_PER_PERIOD = parseValue(1);
     static readonly DEFAULT_BUY_LIMIT = MAX_UINT256;
     static readonly DEFAULT_SUCCESS_THRESHOLD = 0n;
-    static readonly DEFAULT_EARLY_EXCHANGE_RATE = parseValue(1);
+    static readonly DEFAULT_EARLY_EXCHANGE_RATE = parseValue(2);
     static readonly DEFAULT_EARLY_END_TIME_OFFSET = ONE_HOUR;
     static readonly DEFAULT_EARLY_LIMIT = 0n;
 

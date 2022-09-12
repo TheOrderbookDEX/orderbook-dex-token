@@ -1,5 +1,5 @@
 import { formatValue, Transaction } from '@theorderbookdex/abi2ts-lib';
-import { AddContextFunction } from '@theorderbookdex/contract-test-helper';
+import { Account, AddContextFunction } from '@theorderbookdex/contract-test-helper';
 import { PreSaleContext, PreSaleScenario, PreSaleScenarioProperties } from './PreSaleScenario';
 
 export interface BuyPreSaleScenarioProperties extends PreSaleScenarioProperties<PreSaleContext> {
@@ -34,5 +34,13 @@ export class BuyPreSaleScenario extends PreSaleScenario<PreSaleContext, Transact
     async executeStatic({ preSale }: PreSaleContext) {
         const { value } = this;
         return await preSale.callStatic.buy({ value });
+    }
+
+    get expectedAmountBought(): bigint {
+        return this.stateBefore.calculateBoughtTokens(Account.MAIN, this.value)[0];
+    }
+
+    get expectedAmountPaid(): bigint {
+        return this.stateBefore.calculateBoughtTokens(Account.MAIN, this.value)[1];
     }
 }

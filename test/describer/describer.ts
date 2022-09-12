@@ -1,8 +1,9 @@
 import { formatValue } from '@theorderbookdex/abi2ts-lib';
-import { ConfigurableDescriber } from '@theorderbookdex/contract-test-helper';
+import { Account, ConfigurableDescriber } from '@theorderbookdex/contract-test-helper';
 import { BuyPreSaleAction } from '../action/BuyPreSaleAction';
 import { CancelPreSaleAction } from '../action/CancelPreSaleAction';
 import { ClaimPreSaleAction } from '../action/ClaimPreSaleAction';
+import { FastForwardToEarlyEndAction } from '../action/FastForwardToEarlyEndAction';
 import { FastForwardToEndAction } from '../action/FastForwardToEndAction';
 import { FastForwardToReleaseAction } from '../action/FastForwardToReleaseAction';
 import { FastForwardToStartAction } from '../action/FastForwardToStartAction';
@@ -82,7 +83,7 @@ function describePreSaleSettings({
         description.push(description.length ? 'and' : 'with');
         description.push(`successThreshold = ${formatValue(successThreshold)}`);
     }
-    if (earlyExchangeRate != DeployPreSaleScenario.DEFAULT_EXCHANGE_RATE) {
+    if (earlyExchangeRate != DeployPreSaleScenario.DEFAULT_EARLY_EXCHANGE_RATE) {
         description.push(description.length ? 'and' : 'with');
         description.push(`earlyExchangeRate = ${formatValue(earlyExchangeRate)}`);
     }
@@ -155,9 +156,16 @@ describer.addDescriber(CancelPreSaleScenario, ({
 });
 
 describer.addDescriber(BuyPreSaleAction, ({
-    value
+    account, value
 }) => {
-    return `buy using ${formatValue(value)} ETH`;
+    const description = ['buy'];
+    description.push('using');
+    description.push(formatValue(value));
+    description.push('ETH');
+    if (account != Account.MAIN) {
+        description.push(`using ${account}`)
+    }
+    return description.join(' ');
 });
 
 describer.addDescriber(ClaimPreSaleAction, () => {
@@ -174,6 +182,10 @@ describer.addDescriber(CancelPreSaleAction, () => {
 
 describer.addDescriber(FastForwardToStartAction, () => {
     return `fast forward to start`;
+});
+
+describer.addDescriber(FastForwardToEarlyEndAction, () => {
+    return `fast forward to early end`;
 });
 
 describer.addDescriber(FastForwardToEndAction, () => {

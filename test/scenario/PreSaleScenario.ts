@@ -1,10 +1,12 @@
-import { AddContextFunction, BaseTestContext, now, TestScenario, TestScenarioProperties } from '@theorderbookdex/contract-test-helper';
+import { AddContextFunction, applySetupActions, BaseTestContext, now, TestScenario, TestScenarioProperties } from '@theorderbookdex/contract-test-helper';
 import { OrderbookDEXToken } from '../../src/OrderbookDEXToken';
 import { OrderbookDEXPreSale } from '../../src/OrderbookDEXPreSale';
 import { formatExchangeRate, formatTimeOffset, formatTimePeriod } from '../utils/format';
 import { predictContractAddress } from '../utils/ethereum';
 import { formatValue } from '@theorderbookdex/abi2ts-lib';
 import { DeployPreSaleScenario } from './DeployPreSaleScenario';
+import { PreSaleState } from '../state/PreSaleState';
+import { PRE_SALE_TOKENS } from '../utils/tokenomics';
 
 export interface PreSaleContext extends BaseTestContext {
     readonly token: OrderbookDEXToken;
@@ -118,5 +120,12 @@ export abstract class PreSaleScenario<TestContext extends PreSaleContext, Execut
             earlyEndTime, earlyLimit
         );
         return { ...ctx, token, preSale };
+    }
+
+    get stateBefore(): PreSaleState {
+        return applySetupActions(this.setupActions, new PreSaleState({
+            ...this,
+            tokensForSale: PRE_SALE_TOKENS,
+        }));
     }
 }

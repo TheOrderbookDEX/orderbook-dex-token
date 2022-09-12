@@ -16,8 +16,6 @@ chai.use(chaiAsPromised);
 
 DefaultOverrides.gasLimit = 5000000;
 
-// TODO test buy using early exchange rate
-
 describe('OrderbookDEXPreSale', () => {
     describe('deploy', () => {
         for (const scenario of deployPreSaleScenarios) {
@@ -139,20 +137,15 @@ describe('OrderbookDEXPreSale', () => {
 
                 } else {
                     it('should return amount bought', async (test) => {
-                        const { preSale, mainAccount } = test;
-                        const token = IOrderbookDEXToken.at(await preSale.token());
-                        const available = await token.balanceOf(preSale) - await preSale.totalSold();
-                        const buyLimit = await preSale.buyLimit() - await preSale.amountSold(mainAccount);
                         const [ amountBought ] = await test.executeStatic();
-                        const expectedAmountBought = min(scenario.value * scenario.exchangeRate / ETHER, available, buyLimit);
                         expect(amountBought)
-                            .to.be.equal(expectedAmountBought);
+                            .to.be.equal(scenario.expectedAmountBought);
                     });
 
                     it('should return amount paid', async (test) => {
-                        const [ amountBought, amountPaid ] = await test.executeStatic();
+                        const [ , amountPaid ] = await test.executeStatic();
                         expect(amountPaid)
-                            .to.be.equal(amountBought * ETHER / scenario.exchangeRate);
+                            .to.be.equal(scenario.expectedAmountPaid);
                     });
 
                     it('should increase eth balance by amount paid', async (test) => {
