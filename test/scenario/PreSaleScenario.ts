@@ -2,8 +2,7 @@ import { AddContextFunction, applySetupActions, BaseTestContext, now, TestScenar
 import { OrderbookDEXToken } from '../../src/OrderbookDEXToken';
 import { OrderbookDEXPreSale } from '../../src/OrderbookDEXPreSale';
 import { formatExchangeRate, formatTimeOffset, formatTimePeriod } from '../utils/format';
-import { predictContractAddress } from '../utils/ethereum';
-import { formatValue } from '@theorderbookdex/abi2ts-lib';
+import { formatValue, predictContractAddress } from '@theorderbookdex/abi2ts-lib';
 import { DeployPreSaleScenario } from './DeployPreSaleScenario';
 import { PreSaleState } from '../state/PreSaleState';
 import { PRE_SALE_TOKENS } from '../utils/tokenomics';
@@ -108,7 +107,7 @@ export abstract class PreSaleScenario<TestContext extends PreSaleContext, Execut
         const treasury = this.treasury ?? ctx.mainAccount;
         const seed = '0x1000000000000000000000000000000000000002';
         const publicSale = '0x1000000000000000000000000000000000000003';
-        const preSaleAddress = await predictContractAddress(1);
+        const preSaleAddress = await predictContractAddress(ctx.mainAccount, 1);
         const token = await OrderbookDEXToken.deploy(treasury, seed, preSaleAddress, publicSale);
         const {
             exchangeRate, availableAtRelease, vestingPeriod, vestedAmountPerPeriod, buyLimit,
