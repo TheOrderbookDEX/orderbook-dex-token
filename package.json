@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "4.7.3",
-    "@theorderbookdex/abi2ts-lib": "~0.2.0"
+    "@theorderbookdex/abi2ts-lib": "~0.3.0"
   },
   "devDependencies": {
     "@theorderbookdex/abi2ts": "~0.2.0",
@@ -28,11 +28,11 @@
     "@types/mochawesome": "^6.2.1",
     "@types/rimraf": "^3.0.2",
     "@types/through2": "^2.0.36",
-    "@typescript-eslint/eslint-plugin": "^5.36.2",
-    "@typescript-eslint/parser": "^5.36.2",
+    "@typescript-eslint/eslint-plugin": "^5.37.0",
+    "@typescript-eslint/parser": "^5.37.0",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
-    "eslint": "^8.23.0",
+    "eslint": "^8.23.1",
     "fancy-log": "^2.0.0",
     "gulp": "^4.0.2",
     "gulp-cli": "^2.3.0",
