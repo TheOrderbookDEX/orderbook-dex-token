@@ -21,7 +21,7 @@ export async function clean() {
 export function compileContracts() {
     return src('contracts/**/*.sol')
         .pipe(through2.obj(function(file: File, _, callback) {
-            const compileResult = solc(file.base, file.relative, file.contents as Buffer, { optimizer: { enabled: true } });
+            const compileResult = solc(file.base, file.relative, file.contents as Buffer, { optimizer: { enabled: true }, viaIR: true });
 
             const inputJson = file.clone();
             inputJson.contents = Buffer.from(JSON.stringify(compileResult[JSON_INPUT], null, 2));
