@@ -66,10 +66,10 @@ contract OrderbookDEXToken is ERC20, ERC20Burnable, IOrderbookDEXToken {
         _preSale    = preSale_;
         _publicSale = publicSale_;
 
-        _mint(address(treasury_),   TREASURY_TOKENS);
-        _mint(address(seed_),       SEED_TOKENS);
-        _mint(address(preSale_),    PRE_SALE_TOKENS);
-        _mint(address(publicSale_), PUBLIC_SALE_TOKENS);
+        _mint(address(treasury_),   treasuryTokens());
+        _mint(address(seed_),       seedTokens());
+        _mint(address(preSale_),    preSaleTokens());
+        _mint(address(publicSale_), publicSaleTokens());
     }
 
     function burn(uint256 amount) public override (ERC20Burnable, IOrderbookDEXToken) {
@@ -84,15 +84,31 @@ contract OrderbookDEXToken is ERC20, ERC20Burnable, IOrderbookDEXToken {
         return _treasury;
     }
 
+    function treasuryTokens() public pure returns (uint256) {
+        return TREASURY_TOKENS;
+    }
+
     function seed() external view returns (IOrderbookDEXSeed) {
         return _seed;
+    }
+
+    function seedTokens() public pure returns (uint256) {
+        return SEED_TOKENS;
     }
 
     function preSale() external view returns (IOrderbookDEXPreSale) {
         return _preSale;
     }
 
+    function preSaleTokens() public pure returns (uint256) {
+        return PRE_SALE_TOKENS;
+    }
+
     function publicSale() external view returns (IOrderbookDEXPublicSale) {
         return _publicSale;
+    }
+
+    function publicSaleTokens() public pure returns (uint256) {
+        return PUBLIC_SALE_TOKENS;
     }
 }

@@ -35,11 +35,25 @@ interface IOrderbookDEXToken is IERC20 {
     function treasury() external view returns (IOrderbookDEXTeamTreasury treasury);
 
     /**
+     * The tokens initially issued to The Orderbook DEX Team Treasury.
+     *
+     * @return treasuryTokens the tokens initially issued to The Orderbook DEX Team Treasury
+     */
+    function treasuryTokens() external view returns (uint256 treasuryTokens);
+
+    /**
      * The Orderbook DEX seed investors token distribution.
      *
      * @return seed The Orderbook DEX seed investors token distribution
      */
     function seed() external view returns (IOrderbookDEXSeed seed);
+
+    /**
+     * The tokens initially issued to seed investors.
+     *
+     * @return seedTokens the tokens initially issued to seed investors
+     */
+    function seedTokens() external view returns (uint256 seedTokens);
 
     /**
      * The Orderbook DEX pre-sale.
@@ -49,9 +63,23 @@ interface IOrderbookDEXToken is IERC20 {
     function preSale() external view returns (IOrderbookDEXPreSale preSale);
 
     /**
+     * The tokens initially issued for the pre-sale.
+     *
+     * @return preSaleTokens the tokens initially issued for the pre-sale
+     */
+    function preSaleTokens() external view returns (uint256 preSaleTokens);
+
+    /**
      * The Orderbook DEX public sale.
      *
      * @return publicSale The Orderbook DEX public sale
      */
     function publicSale() external view returns (IOrderbookDEXPublicSale publicSale);
+
+    /**
+     * The tokens initially issued for the public sale.
+     *
+     * @return publicSaleTokens the tokens initially issued for the public sale
+     */
+    function publicSaleTokens() external view returns (uint256 publicSaleTokens);
 }
