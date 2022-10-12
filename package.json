@@ -1,6 +1,6 @@
 {
   "name": "@theorderbookdex/orderbook-dex-token",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.5",
   "description": "This is the package for the utility token of The Orderbook DEX",
   "license": "BUSL-1.1",
   "author": "The Orderbook DEX Team",
