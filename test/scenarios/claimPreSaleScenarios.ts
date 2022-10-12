@@ -1,4 +1,4 @@
-import { generatorChain } from '@theorderbookdex/contract-test-helper';
+import { generatorChain } from '@frugal-wizard/contract-test-helper';
 import { describer } from '../describer/describer';
 import { ClaimPreSaleScenario } from '../scenario/ClaimPreSaleScenario';
 import { BuyPreSaleAction } from '../action/BuyPreSaleAction';

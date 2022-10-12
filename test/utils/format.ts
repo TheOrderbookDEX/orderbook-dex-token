@@ -1,4 +1,4 @@
-import { formatValue } from '@theorderbookdex/abi2ts-lib';
+import { formatValue } from '@frugal-wizard/abi2ts-lib';
 import { ONE_DAY, ONE_HOUR, ONE_MINUTE } from './timestamp';
 
 export function formatTimeOffset(offset: bigint, from = 'now'): string {

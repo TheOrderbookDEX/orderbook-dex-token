@@ -1,5 +1,5 @@
-import { DefaultOverrides, getBalance, getBlockTimestamp } from '@theorderbookdex/abi2ts-lib';
-import { describeError } from '@theorderbookdex/contract-test-helper';
+import { DefaultOverrides, getBalance, getBlockTimestamp } from '@frugal-wizard/abi2ts-lib';
+import { describeError } from '@frugal-wizard/contract-test-helper';
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { IOrderbookDEXToken } from '../src/interfaces/IOrderbookDEXToken';

@@ -1,4 +1,4 @@
-import { setChainTime } from '@theorderbookdex/contract-test-helper';
+import { setChainTime } from '@frugal-wizard/contract-test-helper';
 import { PreSaleContext } from '../scenario/PreSaleScenario';
 import { PreSaleStage, PreSaleState } from '../state/PreSaleState';
 import { PreSaleAction, PreSaleActionProperties } from './PreSaleAction';

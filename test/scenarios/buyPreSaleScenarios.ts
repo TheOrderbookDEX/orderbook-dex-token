@@ -1,4 +1,4 @@
-import { Account, generatorChain } from '@theorderbookdex/contract-test-helper';
+import { Account, generatorChain } from '@frugal-wizard/contract-test-helper';
 import { describer } from '../describer/describer';
 import { BuyPreSaleScenario } from '../scenario/BuyPreSaleScenario';
 import { FastForwardToStartAction } from '../action/FastForwardToStartAction';
@@ -7,7 +7,7 @@ import { FastForwardToEndAction } from '../action/FastForwardToEndAction';
 import { BuyPreSaleAction } from '../action/BuyPreSaleAction';
 import { PRE_SALE_TOKENS } from '../utils/tokenomics';
 import { ETHER } from '../utils/eth-units';
-import { MAX_UINT256 } from '@theorderbookdex/abi2ts-lib';
+import { MAX_UINT256 } from '@frugal-wizard/abi2ts-lib';
 import { CancelPreSaleAction } from '../action/CancelPreSaleAction';
 import { FastForwardToEarlyEndAction } from '../action/FastForwardToEarlyEndAction';
 

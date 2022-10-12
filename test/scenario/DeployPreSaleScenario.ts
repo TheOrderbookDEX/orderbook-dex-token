@@ -1,5 +1,5 @@
-import { formatValue, MAX_UINT256, parseValue } from '@theorderbookdex/abi2ts-lib';
-import { AddContextFunction, BaseTestContext, now, TestScenario, TestScenarioProperties } from '@theorderbookdex/contract-test-helper';
+import { formatValue, MAX_UINT256, parseValue } from '@frugal-wizard/abi2ts-lib';
+import { AddContextFunction, BaseTestContext, now, TestScenario, TestScenarioProperties } from '@frugal-wizard/contract-test-helper';
 import { OrderbookDEXPreSale } from '../../src/OrderbookDEXPreSale';
 import { formatExchangeRate, formatTimeOffset, formatTimePeriod } from '../utils/format';
 import { ONE_HOUR } from '../utils/timestamp';

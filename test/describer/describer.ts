@@ -1,5 +1,5 @@
-import { formatValue } from '@theorderbookdex/abi2ts-lib';
-import { Account, ConfigurableDescriber } from '@theorderbookdex/contract-test-helper';
+import { formatValue } from '@frugal-wizard/abi2ts-lib';
+import { Account, ConfigurableDescriber } from '@frugal-wizard/contract-test-helper';
 import { BuyPreSaleAction } from '../action/BuyPreSaleAction';
 import { CancelPreSaleAction } from '../action/CancelPreSaleAction';
 import { ClaimPreSaleAction } from '../action/ClaimPreSaleAction';

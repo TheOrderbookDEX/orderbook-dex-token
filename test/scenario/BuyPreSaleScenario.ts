@@ -1,5 +1,5 @@
-import { formatValue, Transaction } from '@theorderbookdex/abi2ts-lib';
-import { Account, AddContextFunction } from '@theorderbookdex/contract-test-helper';
+import { formatValue, Transaction } from '@frugal-wizard/abi2ts-lib';
+import { Account, AddContextFunction } from '@frugal-wizard/contract-test-helper';
 import { PreSaleContext, PreSaleScenario, PreSaleScenarioProperties } from './PreSaleScenario';
 
 export interface BuyPreSaleScenarioProperties extends PreSaleScenarioProperties<PreSaleContext> {

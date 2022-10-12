@@ -1,4 +1,4 @@
-import { Account } from '@theorderbookdex/contract-test-helper';
+import { Account } from '@frugal-wizard/contract-test-helper';
 import { PreSaleContext } from '../scenario/PreSaleScenario';
 import { PreSaleState } from '../state/PreSaleState';
 import { PreSaleAction, PreSaleActionProperties } from './PreSaleAction';

@@ -1,4 +1,4 @@
-import { generatorChain } from '@theorderbookdex/contract-test-helper';
+import { generatorChain } from '@frugal-wizard/contract-test-helper';
 import { NotEnded, NothingToWithdraw, NotSuccessful, Unauthorized } from '../../src/OrderbookDEXPreSale';
 import { BuyPreSaleAction } from '../action/BuyPreSaleAction';
 import { FastForwardToEndAction } from '../action/FastForwardToEndAction';

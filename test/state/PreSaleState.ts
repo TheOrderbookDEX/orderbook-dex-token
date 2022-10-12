@@ -1,4 +1,4 @@
-import { Account } from '@theorderbookdex/contract-test-helper';
+import { Account } from '@frugal-wizard/contract-test-helper';
 import { ETHER } from '../utils/eth-units';
 import { min } from '../utils/math';
 

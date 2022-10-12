@@ -1,8 +1,8 @@
-import { AddContextFunction, applySetupActions, BaseTestContext, now, TestScenario, TestScenarioProperties } from '@theorderbookdex/contract-test-helper';
+import { AddContextFunction, applySetupActions, BaseTestContext, now, TestScenario, TestScenarioProperties } from '@frugal-wizard/contract-test-helper';
 import { OrderbookDEXToken } from '../../src/OrderbookDEXToken';
 import { OrderbookDEXPreSale } from '../../src/OrderbookDEXPreSale';
 import { formatExchangeRate, formatTimeOffset, formatTimePeriod } from '../utils/format';
-import { formatValue, predictContractAddress } from '@theorderbookdex/abi2ts-lib';
+import { formatValue, predictContractAddress } from '@frugal-wizard/abi2ts-lib';
 import { DeployPreSaleScenario } from './DeployPreSaleScenario';
 import { PreSaleState } from '../state/PreSaleState';
 import { PRE_SALE_TOKENS } from '../utils/tokenomics';

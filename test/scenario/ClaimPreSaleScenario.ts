@@ -1,4 +1,4 @@
-import { Transaction } from '@theorderbookdex/abi2ts-lib';
+import { Transaction } from '@frugal-wizard/abi2ts-lib';
 import { PreSaleContext, PreSaleScenario, PreSaleScenarioProperties } from './PreSaleScenario';
 
 export type ClaimPreSaleScenarioProperties = PreSaleScenarioProperties<PreSaleContext>;
